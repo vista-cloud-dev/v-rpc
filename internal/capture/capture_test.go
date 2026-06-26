@@ -100,6 +100,16 @@ func TestArmRejectsMismatch(t *testing.T) {
 	}
 }
 
+func TestClear(t *testing.T) {
+	ex := &fakeExecer{}
+	if err := Clear(context.Background(), ex); err != nil {
+		t.Fatal(err)
+	}
+	if len(ex.cmds) != 1 || !strings.Contains(ex.cmds[0], "XWBLOG") || !strings.Contains(ex.cmds[0], "K ^XTMP") {
+		t.Errorf("clear cmd not a XWBLOG kill: %q", ex.cmds)
+	}
+}
+
 func TestLevel(t *testing.T) {
 	ex := &fakeExecer{out: []string{"<<R>>2<<E>>"}}
 	lvl, err := Level(context.Background(), ex)

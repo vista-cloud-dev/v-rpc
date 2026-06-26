@@ -22,6 +22,7 @@ type debugCmd struct {
 	Status  statusCmd  `cmd:"" help:"Show the current XWBDEBUG level and active log jobs."`
 	Arm     armCmd     `cmd:"" help:"Turn XWBDEBUG capture on (set the broker debug level)."`
 	Disarm  disarmCmd  `cmd:"" help:"Turn XWBDEBUG capture off (restore the debug level)."`
+	Clear   clearCmd   `cmd:"" help:"Wipe the buffered XWBLOG (leave the engine pristine)."`
 	Ping    pingCmd    `cmd:"" help:"Fire test RPCs at a broker so a tap has traffic to capture."`
 }
 
@@ -29,13 +30,14 @@ type debugCmd struct {
 
 // tapOpts are the knobs common to tail and capture.
 type tapOpts struct {
-	All      bool          `help:"Show every log line, not just RPC: lines."`
-	Filter   string        `help:"Only RPCs whose name contains this (case-insensitive)." placeholder:"TEXT"`
-	Interval float64       `help:"Poll interval in seconds." default:"1.0"`
-	Duration time.Duration `help:"Stop after this long (e.g. 30s); 0 = run until Ctrl-C." default:"0"`
-	Level    int           `help:"XWBDEBUG level to arm: 2=names, 3=names+params (PHI)." default:"2" enum:"2,3"`
-	Keep     bool          `help:"Leave XWBDEBUG armed on exit (default restores the prior level)."`
-	NoClear  bool          `help:"Do not clear the existing XWBLOG on start (capture what is already buffered too)."`
+	All       bool          `help:"Show every log line, not just RPC: lines."`
+	Filter    string        `help:"Only RPCs whose name contains this (case-insensitive)." placeholder:"TEXT"`
+	Interval  float64       `help:"Poll interval in seconds." default:"1.0"`
+	Duration  time.Duration `help:"Stop after this long (e.g. 30s); 0 = run until Ctrl-C." default:"0"`
+	Level     int           `help:"XWBDEBUG level to arm: 2=names, 3=names+params (PHI)." default:"2" enum:"2,3"`
+	Keep      bool          `help:"Leave XWBDEBUG armed on exit (default restores the prior level)."`
+	NoClear   bool          `help:"Do not clear the existing XWBLOG on start (capture what is already buffered too)."`
+	RestoreTo int           `help:"Level to restore on exit; -1 = the level found at start. Use 1 to force stock if a prior run left it armed." default:"-1"`
 }
 
 func (o tapOpts) show(r capture.Record) bool {
@@ -67,16 +69,20 @@ func runTap(ec engineConn, o tapOpts, emit func(capture.Record), note func(strin
 	if err := capture.Arm(ctx, ex, o.Level); err != nil {
 		return clikit.Fail(clikit.ExitRuntime, "ARM", err.Error(), "")
 	}
+	restoreLevel := prior // restore to the level found at start...
+	if o.RestoreTo >= 0 {
+		restoreLevel = o.RestoreTo // ...unless an explicit target is given
+	}
 	defer func() {
 		if !o.Keep {
-			_ = capture.Disarm(context.Background(), ex, prior)
+			_ = capture.Disarm(context.Background(), ex, restoreLevel)
 		}
 	}()
 	if !o.NoClear {
 		_ = capture.Clear(ctx, ex)
 	}
 	note(fmt.Sprintf("# XWBDEBUG armed at %d on %s; restoring to %d on exit — Ctrl-C to stop",
-		o.Level, ec.Engine, prior))
+		o.Level, ec.Engine, restoreLevel))
 
 	sctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()
@@ -221,6 +227,35 @@ func (c *statusCmd) Run(cc *clikit.Context) error {
 		fmt.Fprintf(cc.Stdout, "engine %s: XWBDEBUG level %d (%s); %d log job(s), %d RPC line(s) buffered\n",
 			data.Engine, data.Level, armed, data.LogJobs, data.RPCs)
 	})
+}
+
+// --- clear ------------------------------------------------------------------
+
+type clearCmd struct {
+	engineConn
+}
+
+func (c *clearCmd) Run(cc *clikit.Context) error {
+	ex, ferr := c.execer()
+	if ferr != nil {
+		return ferr
+	}
+	ctx := context.Background()
+	before, err := capture.ReadAll(ctx, ex) // count first, for a useful report
+	if err != nil {
+		return clikit.Fail(clikit.ExitRuntime, "ENGINE", err.Error(),
+			"is the engine up and reachable over the driver?")
+	}
+	if err := capture.Clear(ctx, ex); err != nil {
+		return clikit.Fail(clikit.ExitRuntime, "CLEAR", err.Error(), "")
+	}
+	return cc.Result(
+		struct {
+			Engine  string `json:"engine"`
+			Cleared int    `json:"cleared"`
+		}{c.Engine, len(before)},
+		func() { fmt.Fprintf(cc.Stdout, "cleared %d buffered XWBLOG line(s) on %s\n", len(before), c.Engine) },
+	)
 }
 
 // --- arm / disarm -----------------------------------------------------------

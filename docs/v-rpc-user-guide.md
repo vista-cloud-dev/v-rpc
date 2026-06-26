@@ -148,6 +148,16 @@ v-rpc debug arm    --engine ydb --container vehu          # set level 2 (names)
 v-rpc debug disarm --engine ydb --container vehu          # restore to level 1 (stock)
 ```
 
+### `clear` — wipe the buffered log
+
+Kills all `^XTMP("XWBLOG"*)` nodes so the engine is pristine (the buffer otherwise
+auto-purges after ~7 days). Reports how many lines it removed.
+
+```bash
+v-rpc debug clear --engine ydb --container vehu
+# cleared 160 buffered XWBLOG line(s) on ydb
+```
+
 ## 4. Common flags (`tail` and `capture`)
 
 | Flag | Default | What it does |
@@ -159,6 +169,7 @@ v-rpc debug disarm --engine ydb --container vehu          # restore to level 1 (
 | `--level {2,3}` | `2` | Debug level to arm — **see the PHI warning below** |
 | `--keep` | off | Leave `XWBDEBUG` armed on exit instead of restoring |
 | `--no-clear` | off | Don't wipe the existing log on start (capture what's already buffered) |
+| `--restore-to N` | `-1` | Level to restore on exit (`-1` = the level found at start). Use `1` to force stock if a prior/overlapping run left it armed |
 | `--out PATH` | — | (`capture` only, required) output file; `file://PATH` or `PATH` |
 | `--quiet` | off | (`capture` only) don't echo to the terminal |
 
@@ -246,7 +257,8 @@ tool — `v rpc debug` only produces the comparable oracle output.
 | `NO_DRIVER` error | The `m-<engine>` driver isn't found — build it (`make build` in `m-ydb`/`m-iris`) or set `M_<ENGINE>_BIN`. |
 | `ENGINE` error from `status` | Engine down or unreachable over the driver — check the container is up and the transport/container flags are right. |
 | Nothing appears in `tail` | No traffic is hitting the broker, or your `--filter` excludes it; try `--all`, and confirm with `status` that the level is ≥ 2. |
-| Level didn't restore | The process was hard-killed (`kill -9`) before its restore ran. Re-run `v rpc debug disarm` to set it back to 1, then `status` to confirm. |
+| Level didn't restore (still `ON`) | Either a hard-kill (`kill -9`) skipped the restore, or an **overlapping run**: `tail`/`capture` restore to the level they *found* at start, so if one started while another already armed level 2, it leaves it at 2. Fix: `v rpc debug disarm`, or run with `--restore-to 1` to force stock on exit. |
+| Buffered lines won't go away | They auto-purge in ~7 days; to wipe now use `v rpc debug clear` (or start a `tail`/`capture` without `--no-clear`). |
 | Capture file empty | The workload ran outside the capture window, or every connection was wiped between polls — lower `--interval`, or arm first and capture with `--no-clear`. |
 
 ## See also

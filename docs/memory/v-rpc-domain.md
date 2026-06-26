@@ -13,7 +13,7 @@ engine driver seam to **view live RPC traffic in the terminal** or **save it to 
 file as LDJSON** for **offline comparison against the Phase-2 VSL tap** — a
 debug/validation tool, NOT a durable egress tap (that's the VSL hook).
 
-**Locked design (with owner):** `v rpc debug {tail,capture,status,arm,disarm,ping}`
+**Locked design (with owner):** `v rpc debug {tail,capture,status,arm,disarm,clear,ping}`
 (`ping` fires no-arg [XWB] RPCs at a broker to self-test capture — RPC-client role,
 takes `--addr`, not the engine seam);
 shared flags `--all/--filter/--interval/--duration/--level{2,3}/--keep/--no-clear`;
@@ -48,10 +48,11 @@ CPRS-in-VBox reaches the loopback broker via the `socat` relay
 ([[vehu-broker-vbox-relay]], CPRS → `10.0.2.2:19431`). Capture `*.ldjson` is
 gitignored (data, not source).
 
-**KNOWN INTERACTION:** `tail`/`capture` restore XWBDEBUG to the level they *found*
-at start. Overlapping runs (capture started while a tail already armed level 2)
-leave it at 2, not 1 — run `v rpc debug disarm` to force back to 1. (There is no
-standalone `clear` verb yet — buffered XWBLOG auto-purges in ~7 days.)
+**RESTORE/CLEAR (added 2026-06-26):** `tail`/`capture` restore XWBDEBUG to the
+level they *found* at start, so overlapping runs can leave it armed — pass
+`--restore-to 1` to force stock on exit, or `v rpc debug disarm`. `v rpc debug
+clear` wipes the buffered `^XTMP("XWBLOG"*)` on demand (it otherwise auto-purges in
+~7 days).
 
 **OWED (owner):**
 1. `gh repo create vista-cloud-dev/v-rpc` + push `main` (repo creation is the

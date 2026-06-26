@@ -20,6 +20,7 @@ v rpc debug tail     --engine ydb --container vehu     # live viewer in the term
 v rpc debug capture  --engine ydb --container vehu --out rpc.ldjson   # save LDJSON for offline analysis
 v rpc debug arm      --engine ydb --container vehu     # turn capture on (XWBDEBUG level 2)
 v rpc debug disarm   --engine ydb --container vehu     # restore (level 1 = stock)
+v rpc debug clear    --engine ydb --container vehu     # wipe the buffered XWBLOG (pristine)
 v rpc debug ping     --addr 127.0.0.1:9430            # fire test RPCs so a tap has traffic
 ```
 
