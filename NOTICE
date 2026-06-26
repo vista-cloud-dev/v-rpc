@@ -1,0 +1,10 @@
+m-kids
+Copyright 2026 vista-cloud-dev
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+m-kids is the Go port of py-kids-vc (github.com/rafael5/py-kids-vc), itself a
+port of Sam Habiel's XPDK2VC (Apache-2.0). It version-controls VistA KIDS
+distribution files. Scaffolded from go-cli-template; final license
+reconciliation across the m-cli Go toolchain is deferred to project completion
+(end state Apache-2.0).

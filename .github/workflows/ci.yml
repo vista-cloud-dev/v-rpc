@@ -1,0 +1,12 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    uses: vista-cloud-dev/.github/.github/workflows/go-ci.yml@main
+  arch:
+    uses: vista-cloud-dev/.github/.github/workflows/arch-waterline.yml@main
