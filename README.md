@@ -56,4 +56,5 @@ each connection start, so a connection that begins and ends entirely between two
 polls can be missed. Fine for "is traffic flowing" and oracle comparison; the
 lossless, durable tap is the VSL hook.
 
-See `docs/v-rpc-implementation-plan.md`.
+See `docs/v-rpc-user-guide.md` (full usage) and
+`docs/v-rpc-implementation-plan.md` (design + tracker).
