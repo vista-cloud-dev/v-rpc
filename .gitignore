@@ -11,6 +11,9 @@ coverage.html
 coverage.txt
 *.lcov
 
+# RPC capture artifacts — data, never source (even at level 2 = names only)
+*.ldjson
+
 # Editor / OS
 .DS_Store
 .idea/

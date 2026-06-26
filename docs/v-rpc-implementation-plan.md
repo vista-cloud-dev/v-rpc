@@ -64,7 +64,12 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
   real `mdriver.Client` adapter; `main.go`. `make check` green (gofmt+lint+race+build).
   **Live `status` proven** through the real driver against vehu (level 1, as-found).
   Live `arm`/`capture` streaming validation deferred to owner (state-changing ops).
-- [ ] **I4 — README + memory** (README done); local commit; hand owner `gh repo create`.
+- [x] **I4 — README + user guide + memory**; local commits. Owner `gh repo create` still owed.
+- [x] **Live validation against real CPRS (2026-06-26)** — captured a full sign-on
+  (1,120 RPCs / 242 distinct / 7 connections) to `cprs-login.ldjson`; canonical
+  signon sequence verified. vehu login via documented `worldvista/vehu` creds
+  (PROVIDER,VERO `CAS123`), CPRS→broker via the socat relay. Capture `*.ldjson`
+  gitignored. Known interaction: restore-to-found-level — `disarm` forces back to 1.
 - [ ] **I5 (deferred)** — `vcontract.Contract()` + mount into `v-cli` (needs the
   published, tagged repo; v-cli pins versions, no `replace`).
 

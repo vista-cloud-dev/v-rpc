@@ -33,17 +33,30 @@ for the oracle role. See the vehu-side mechanics in the shared
 `cprs-rpc-xwbdebug-host-probe` memory.
 
 **State:** `make check` green (gofmt+golangci-lint+race+build); `internal/*`
-74–80% covered; live `status` proven against vehu through the real driver. Deps
-pin clikit v0.1.0 + m-driver-sdk v0.3.0 (airgapped, no `replace`). Furniture from
-v-pkg/go-cli-template.
+74–80% covered. Deps pin clikit v0.1.0 + m-driver-sdk v0.3.0 (airgapped, no
+`replace`). Furniture from v-pkg/go-cli-template.
+
+**VALIDATED END-TO-END against real CPRS (2026-06-26).** Live `tail`/`capture` +
+`ping` all exercised against vehu through the real driver. Captured a complete
+CPRS sign-on to `cprs-login.ldjson`: 1,120 RPC records, 242 distinct RPCs, 7
+broker connections. Canonical signon verified — `XUS SIGNON SETUP` → `XUS INTRO
+MSG` → `XUS AV CODE` → `XUS GET USER INFO` → `XWB GET BROKER INFO` → `XUS DIVISION
+GET` → `XWB CREATE CONTEXT`×4 → chart-load RPCs (ORWDX/ORWU/TIU/ORQQ…). vehu login
+via documented `worldvista/vehu` Docker Hub creds (PROVIDER,VERO access `CAS123`;
+access codes confirmed read-only via `$$EN^XUSHSH` + #200 "A" index — no mutation).
+CPRS-in-VBox reaches the loopback broker via the `socat` relay
+([[vehu-broker-vbox-relay]], CPRS → `10.0.2.2:19431`). Capture `*.ldjson` is
+gitignored (data, not source).
+
+**KNOWN INTERACTION:** `tail`/`capture` restore XWBDEBUG to the level they *found*
+at start. Overlapping runs (capture started while a tail already armed level 2)
+leave it at 2, not 1 — run `v rpc debug disarm` to force back to 1. (There is no
+standalone `clear` verb yet — buffered XWBLOG auto-purges in ~7 days.)
 
 **OWED (owner):**
 1. `gh repo create vista-cloud-dev/v-rpc` + push `main` (repo creation is the
    owner's step per org convention).
-2. Run the live `arm`/`capture`/`tail` streaming validation (state-changing engine
-   ops — held back this session); confirm restore-on-exit leaves `XWBDEBUG=1`.
-   Traffic is now driven by `v rpc debug ping --addr 127.0.0.1:9430` (Go [XWB]
-   wire client, `internal/xwbwire`) — self-contained, no python/CPRS needed.
+2. ✅ DONE 2026-06-26 — live-validated against real CPRS (see VALIDATED above).
 3. **I5 (deferred): mount into v-cli** — add `vcontract.Contract()` to `rpccli`
    (mirror pkgcli/contract.go), then in v-cli add `Rpc rpccli.Commands` +
    `rpccli.Contract()` to the registry. Needs v-rpc published + tagged (v-cli pins
