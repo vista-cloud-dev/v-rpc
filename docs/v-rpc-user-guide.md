@@ -86,6 +86,43 @@ v-rpc debug status --engine ydb --transport docker --container vehu
 (The connection — container, base URL, credentials — is otherwise read by the
 driver from its `M_<ENGINE>_*` environment, exactly like `m vista`.)
 
+### Setting defaults (skip the flags)
+
+Every engine flag also reads an environment variable, so set them once and drop
+the flags entirely:
+
+| Flag | Env var |
+|---|---|
+| `--engine` | `VRPC_ENGINE` |
+| `--transport` | `VRPC_TRANSPORT` |
+| `--container` | `VRPC_CONTAINER` |
+| `--addr` (`ping`) | `VRPC_ADDR` |
+
+```bash
+export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb     # driver location
+export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker VRPC_CONTAINER=vehu
+
+v-rpc debug status        # no --engine/--transport/--container needed
+v-rpc debug tail
+v-rpc debug capture --out rpc.ldjson
+```
+
+A flag on the command line always **overrides** its env var, so you can keep ydb
+as the default and switch to IRIS ad hoc with `--engine iris`.
+
+**Make it persistent** with [direnv](https://direnv.net) — the house per-project
+env backbone. Add to `~/vista-cloud-dev/v-rpc/.envrc` (then `direnv allow`):
+
+```bash
+export M_YDB_BIN="$HOME/vista-cloud-dev/m-ydb/dist/m-ydb"
+export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker VRPC_CONTAINER=vehu
+```
+
+so the defaults apply automatically whenever you `cd` into the repo. (Or put the
+same `export`s in your shell rc for a machine-wide default.) The driver-native
+`M_<ENGINE>_CONTAINER` (e.g. `M_YDB_CONTAINER=vehu`) also works for the container
+if you prefer the driver's own variable.
+
 ## 3. Logging into vehu
 
 To drive real traffic you log a client (CPRS) into VistA. For the `worldvista/vehu`

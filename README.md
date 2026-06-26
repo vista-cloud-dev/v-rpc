@@ -31,6 +31,10 @@ v rpc debug clear    --engine ydb --container vehu     # wipe the buffered XWBLO
 v rpc debug ping     --addr 127.0.0.1:9430            # fire test RPCs so a tap has traffic
 ```
 
+The engine flags also read env vars — `export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker
+VRPC_CONTAINER=vehu` (e.g. via direnv) and drop them from the command line. See the
+[user guide](docs/v-rpc-user-guide.md#2-selecting-the-engine).
+
 Shared flags on `tail`/`capture`: `--all` (every log line, not just `RPC:`),
 `--filter TEXT` (RPC-name substring), `--interval` (poll seconds), `--duration`
 (bounded run, e.g. `30s`), `--level {2,3}` (3 logs params = **PHI**), `--keep`

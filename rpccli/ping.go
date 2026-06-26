@@ -19,7 +19,7 @@ var defaultPingRPCs = []string{"XWB IM HERE", "XUS INTRO MSG", "XWB GET VARIABLE
 // broker may end the job after one unauthenticated message) — it does NOT reach
 // the M engine, so it takes a broker --addr, not the engine flags.
 type pingCmd struct {
-	Addr    string        `help:"Broker host:port to ping (vehu=127.0.0.1:9430, foia=...:19430)." default:"127.0.0.1:9430" placeholder:"HOST:PORT"`
+	Addr    string        `help:"Broker host:port to ping; vehu=127.0.0.1:9430 ($VRPC_ADDR)." default:"127.0.0.1:9430" placeholder:"HOST:PORT" env:"VRPC_ADDR"`
 	RPC     []string      `help:"RPC name to send; repeatable. Default: a small no-arg set." placeholder:"NAME"`
 	Count   int           `help:"Send the whole set this many times." default:"1"`
 	Timeout time.Duration `help:"Per-connection read timeout." default:"3s"`

@@ -21,7 +21,9 @@ explicit `--engine ydb|iris` (ydb/vehu now, IRIS-VistA for VA validation later);
 capture LDJSON field names align with the s3tap envelope (`rpc`,`ts`,`job`,`seq`)
 so the two captures can be **joined offline and separately** — correlation is NOT
 in this tool. Level 3 logs params = PHI (default 2 = names only). CLI viewer now;
-TUI later.
+TUI later. Engine flags also read env (`VRPC_ENGINE`/`VRPC_TRANSPORT`/
+`VRPC_CONTAINER`, `VRPC_ADDR` for ping) via kong `env:""` tags — set once (direnv
+`.envrc` / shell rc) and omit the flags; a CLI flag overrides its env var.
 
 **Architecture (waterline-clean):** `internal/xwblog` = pure parse/record/LDJSON/
 dedup (no engine dep, TDD); `internal/capture` = arm/disarm + poll + dedup over a
