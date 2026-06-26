@@ -17,7 +17,11 @@ export CGO_ENABLED := 0
 
 PLATFORMS := linux/amd64 linux/arm64 darwin/arm64 windows/amd64
 
-.PHONY: all check build run lint test tidy schema dist clean
+.PHONY: all check build run lint test tidy schema dist install clean
+
+# Where `make install` drops the binary (override: make install BINDIR=~/scripts/bin).
+PREFIX ?= $(HOME)/.local
+BINDIR ?= $(PREFIX)/bin
 
 all: lint test build
 
@@ -51,6 +55,14 @@ dist:
 		GOOS=$$os GOARCH=$$arch go build $(GOFLAGS) -ldflags "$(LDFLAGS)" \
 			-o dist/$(BIN)-$$os-$$arch$$ext . ; \
 	done
+
+# Install the static binary onto PATH. Co-locate the m-<engine> driver in the
+# same BINDIR and v-rpc auto-finds it (driver-contract §4) — no M_<ENGINE>_BIN.
+install: build
+	@mkdir -p "$(BINDIR)"
+	install -m 0755 dist/$(BIN) "$(BINDIR)/$(BIN)"
+	@echo "installed $(BIN) -> $(BINDIR)/$(BIN)"
+	@echo "tip: also put m-ydb / m-iris in $(BINDIR) so v-rpc locates the driver automatically."
 
 clean:
 	rm -f dist/$(BIN) dist/$(BIN)-* *.test

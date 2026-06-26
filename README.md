@@ -57,12 +57,19 @@ development (has data), IRIS-VistA for VA validation. The connection
 Engine access is **only** through `mdriver.Client` (the m-driver-sdk seam,
 waterline rule 3) — never raw `docker exec`. Layer `v`.
 
-## Build
+## Build & install
 
 ```
-make check     # gofmt + lint + race tests + build (the pre-commit gate)
-make build     # -> dist/v-rpc
+make check                       # gofmt + lint + race tests + build (pre-commit gate)
+make build                       # -> dist/v-rpc
+make install BINDIR=~/scripts/bin   # install onto PATH
 ```
+
+`v-rpc` is one static binary. Put the `m-ydb`/`m-iris` driver in the **same** PATH
+directory and `v-rpc` auto-locates it (no `M_<ENGINE>_BIN` needed). Then the only
+config is the container — `export VRPC_CONTAINER=vehu` (engine defaults to `ydb`,
+transport to `docker`) and run flagless: `v-rpc debug status`. See the
+[user guide §1](docs/v-rpc-user-guide.md#1-setup-one-time).
 
 Caveat (inherent to XWBDEBUG): `^XTMP("XWBLOG"_$J)` is per-handler and wiped at
 each connection start, so a connection that begins and ends entirely between two

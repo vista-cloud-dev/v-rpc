@@ -29,7 +29,7 @@ type Commands struct {
 // optional --container is a convenience that sets M_<ENGINE>_CONTAINER for this
 // process. Engine is required: ydb/vehu now, IRIS-VistA for VA validation later.
 type engineConn struct {
-	Engine    string `help:"Engine to reach: ydb or iris ($VRPC_ENGINE)." enum:"ydb,iris" required:"" env:"VRPC_ENGINE"`
+	Engine    string `help:"Engine to reach: ydb or iris ($VRPC_ENGINE)." enum:"ydb,iris" default:"ydb" env:"VRPC_ENGINE"`
 	Transport string `help:"Driver transport: local | docker | remote ($VRPC_TRANSPORT)." enum:"local,docker,remote" default:"docker" env:"VRPC_TRANSPORT"`
 	Container string `help:"Engine container/instance name; sets M_<ENGINE>_CONTAINER ($VRPC_CONTAINER)." placeholder:"NAME" env:"VRPC_CONTAINER"`
 }

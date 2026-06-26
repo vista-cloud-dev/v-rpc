@@ -31,7 +31,7 @@ Use it to answer questions like:
 
 ## Contents
 
-1. [Prerequisites](#1-prerequisites)
+1. [Setup (one time)](#1-setup-one-time)
 2. [Selecting the engine](#2-selecting-the-engine)
 3. [Logging into vehu — credentials, user, and the richest patient](#3-logging-into-vehu)
 4. [The commands](#4-the-commands)
@@ -44,43 +44,56 @@ Use it to answer questions like:
 
 ---
 
-## 1. Prerequisites
+## 1. Setup (one time)
 
-- A reachable engine driven through the **m-driver-sdk seam** — `v rpc` never
-  touches the engine any other way. You need the `m-<engine>` driver binary on
-  `PATH` or pointed to by `M_<ENGINE>_BIN`:
+`v-rpc` is a single static binary. It reaches the engine **only** through the
+m-driver-sdk seam, so it needs the `m-<engine>` driver binary reachable — the one
+external dependency. Put both binaries on your `PATH` **in the same directory** and
+`v-rpc` locates the driver automatically (driver-contract §4) — **no `M_<ENGINE>_BIN`
+to set**:
 
-  ```bash
-  export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb     # for ydb
-  # export M_IRIS_BIN=~/vista-cloud-dev/m-iris/dist/m-iris  # for iris
-  ```
+```bash
+cd ~/vista-cloud-dev/v-rpc && make install BINDIR=~/scripts/bin   # installs v-rpc
+install -m755 ~/vista-cloud-dev/m-ydb/dist/m-ydb ~/scripts/bin/   # co-locate the driver
+```
 
-- The target engine up and healthy (e.g. the `vehu` YottaDB-VistA container).
-- The `v-rpc` binary built, and (optionally) on your `PATH`:
+The only thing `v-rpc` can't guess is **which engine container** to talk to. Set it
+once — engine defaults to `ydb`, transport to `docker`:
 
-  ```bash
-  cd ~/vista-cloud-dev/v-rpc && make build            # -> dist/v-rpc
-  cp dist/v-rpc ~/scripts/bin/v-rpc                    # ~/scripts/bin is on $PATH
-  # or: ln -s "$PWD/dist/v-rpc" ~/scripts/bin/v-rpc   # symlink to track rebuilds
-  ```
+```bash
+export VRPC_CONTAINER=vehu        # once per shell, or in the repo .envrc (direnv)
+```
+
+That's the whole configuration. Everything is now flagless:
+
+```bash
+v-rpc debug status
+v-rpc debug tail
+v-rpc debug capture --out rpc.ldjson
+```
+
+**Requirements:** Docker running with the target engine container up (e.g. `vehu`).
+For IRIS, co-locate the `m-iris` driver and add `--engine iris` (or
+`VRPC_ENGINE=iris`). `M_<ENGINE>_BIN` still works as an explicit override if you
+keep the driver somewhere else.
 
 Once mounted into the `v` umbrella, every command below is also available as
 `v rpc debug …`. Standalone, it is `v-rpc debug …` (the form used throughout).
 
 ## 2. Selecting the engine
 
-Engine selection is **explicit** — there is no default, on purpose (ydb/vehu has
-data for development; IRIS-VistA is the target for VA validation). Every engine-side
-command takes:
+Engine-side commands take three knobs, all with sensible defaults so you usually
+override **nothing** (just set the container once, per §1):
 
-| Flag | Meaning | Typical value |
-|---|---|---|
-| `--engine` | which engine: `ydb` or `iris` (**required**) | `ydb` |
-| `--transport` | driver transport: `local`, `docker`, `remote` | `docker` (default) |
-| `--container` | container/instance name; sets `M_<ENGINE>_CONTAINER` | `vehu` |
+| Flag | Default | Env | Meaning |
+|---|---|---|---|
+| `--engine` | `ydb` | `VRPC_ENGINE` | which engine: `ydb` or `iris` (IRIS = explicit opt-in for VA validation) |
+| `--transport` | `docker` | `VRPC_TRANSPORT` | driver transport: `local`, `docker`, `remote` |
+| `--container` | — | `VRPC_CONTAINER` | container/instance name; sets `M_<ENGINE>_CONTAINER` |
 
 ```bash
-v-rpc debug status --engine ydb --transport docker --container vehu
+v-rpc debug status                                    # ydb / docker / $VRPC_CONTAINER
+v-rpc debug status --engine iris --container foia-t12 # override ad hoc
 ```
 
 (The connection — container, base URL, credentials — is otherwise read by the

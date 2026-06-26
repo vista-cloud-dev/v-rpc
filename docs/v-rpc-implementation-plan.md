@@ -73,6 +73,11 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
 - [ ] **I5 (deferred)** — `vcontract.Contract()` + mount into `v-cli` (needs the
   published, tagged repo; v-cli pins versions, no `replace`).
 
+- [x] **Minimal config / portability (2026-06-26)** — engine flags read env
+  (`VRPC_*`); `--engine` defaults to `ydb`; driver auto-located next to `v-rpc` on
+  PATH (no `M_<ENGINE>_BIN`); `make install`. Net: only `VRPC_CONTAINER` needed,
+  `v-rpc debug status` runs fully flagless. Verified against vehu.
+
 ## Non-goals (this repo)
 
 S3/MinIO egress; request↔response correlation; payloads/results (XWBDEBUG has

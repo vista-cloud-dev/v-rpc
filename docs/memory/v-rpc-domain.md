@@ -17,13 +17,20 @@ debug/validation tool, NOT a durable egress tap (that's the VSL hook).
 (`ping` fires no-arg [XWB] RPCs at a broker to self-test capture — RPC-client role,
 takes `--addr`, not the engine seam);
 shared flags `--all/--filter/--interval/--duration/--level{2,3}/--keep/--no-clear`;
-explicit `--engine ydb|iris` (ydb/vehu now, IRIS-VistA for VA validation later);
+`--engine` defaults to `ydb` (IRIS = explicit opt-in for VA validation);
 capture LDJSON field names align with the s3tap envelope (`rpc`,`ts`,`job`,`seq`)
 so the two captures can be **joined offline and separately** — correlation is NOT
 in this tool. Level 3 logs params = PHI (default 2 = names only). CLI viewer now;
 TUI later. Engine flags also read env (`VRPC_ENGINE`/`VRPC_TRANSPORT`/
 `VRPC_CONTAINER`, `VRPC_ADDR` for ping) via kong `env:""` tags — set once (direnv
 `.envrc` / shell rc) and omit the flags; a CLI flag overrides its env var.
+
+**MINIMAL CONFIG (2026-06-26):** driver auto-located by `mdriver.Locate` when the
+`m-ydb`/`m-iris` binary sits next to `v-rpc` on PATH (rule: $M_<ENGINE>_BIN → exe-dir
+→ sibling dist/ → PATH) — so co-install both via `make install BINDIR=…` + drop the
+driver in the same dir, and **no `M_<ENGINE>_BIN` needed**. With engine defaulting to
+ydb + transport docker, the ONLY irreducible config is the container
+(`VRPC_CONTAINER`); `v-rpc debug status` then runs fully flagless. Verified.
 
 **Architecture (waterline-clean):** `internal/xwblog` = pure parse/record/LDJSON/
 dedup (no engine dep, TDD); `internal/capture` = arm/disarm + poll + dedup over a
