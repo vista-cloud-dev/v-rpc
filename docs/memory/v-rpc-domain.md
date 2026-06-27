@@ -67,7 +67,15 @@ clear` wipes the buffered `^XTMP("XWBLOG"*)` on demand (it otherwise auto-purges
 1. `gh repo create vista-cloud-dev/v-rpc` + push `main` (repo creation is the
    owner's step per org convention).
 2. ✅ DONE 2026-06-26 — live-validated against real CPRS (see VALIDATED above).
-3. **I5 (deferred): mount into v-cli** — add `vcontract.Contract()` to `rpccli`
-   (mirror pkgcli/contract.go), then in v-cli add `Rpc rpccli.Commands` +
-   `rpccli.Contract()` to the registry. Needs v-rpc published + tagged (v-cli pins
-   versions, no `replace`).
+3. ✅ **I5 DONE 2026-06-26: mounted into v-cli.** Added `rpccli.Contract()`
+   (`rpccli/contract.go`, mirrors pkgcli/contract.go; `Version="0.1.0"`,
+   `ContractVersion="1.0"`, imports `v-pkg/vcontract` for the shared `Manifest`
+   type — a v→v dep, waterline-OK). Repinned clikit v0.4.0 + added the shared
+   discovery surface to the standalone (`explore`/`schema`/`version` under
+   Introspect, `debug` under a Capture group). Tagged **v-rpc v0.1.0**; v-cli now
+   has `Rpc rpccli.Commands` (group Domains) + `rpccli.Contract()` in
+   `buildRegistry()` (golden `dist/v-registry.json` regenerated). `v rpc <verb>`
+   live on PATH. **GOTCHA:** fetching a fresh private-repo tag needs
+   `go env -w GOPRIVATE=github.com/vista-cloud-dev` + `gh auth setup-git` — the
+   default `proxy.golang.org,direct` can't auth and fails with "could not read
+   Username for github.com".
