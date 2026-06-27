@@ -2,7 +2,8 @@
 # from go-cli-template: static (CGO_ENABLED=0), -trimpath, version stamped via
 # -ldflags, cross-compile matrix, lint, test, schema.
 
-BIN     ?= v-rpc                     # the v rpc domain CLI (standalone)
+# BIN: the v rpc domain CLI (standalone).
+BIN     ?= v-rpc
 PKG     := github.com/vista-cloud-dev/v-rpc
 # Version is stamped into the shared clikit module.
 LDPKG   := github.com/vista-cloud-dev/clikit
