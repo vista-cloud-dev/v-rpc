@@ -36,7 +36,7 @@ Use it to answer questions like:
 3. [Logging into vehu — credentials, user, and the richest patient](#3-logging-into-vehu)
 4. [The commands](#4-the-commands)
 5. [Common flags](#5-common-flags)
-6. [End-to-end run (copy/paste)](#6-end-to-end-run)
+6. [End-to-end run (copy/paste)](#6-end-to-end-run) · [Connecting CPRS to vehu (networking)](#connecting-cprs-to-vehu-networking)
 7. [Comparing against the VSL tap](#7-comparing-against-the-vsl-tap)
 8. [Limitations](#8-limitations)
 9. [Troubleshooting](#9-troubleshooting)
@@ -179,6 +179,23 @@ patient), so it lights up far fewer tabs than TEN,PATIENT. For a representative
 full-chart RPC sweep, prefer **TEN,PATIENT**.
 
 ## 4. The commands
+
+`v rpc` has two families: **`debug`** (the XWBDEBUG tap — `status`/`tail`/`capture`/…,
+covered below) and the **Connect** verbs **`doctor`** and **`relay`** that get CPRS
+talking to VistA in the first place.
+
+### `doctor` / `relay` — get CPRS connected
+
+`v rpc doctor` checks the whole CPRS→VistA network path and tells you exactly what's
+wrong and how to fix it; `v rpc relay` republishes the loopback-bound broker so a VM
+can reach it. Because this is the most common stumbling block, it has its own
+section: [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking).
+
+```bash
+v-rpc doctor          # diagnose the path; prints the exact CPRS address (or the fix)
+v-rpc doctor --fix    # ...and start the relay if it's needed and missing
+v-rpc relay --install # persistent host relay (systemd --user); or `v-rpc relay` foreground
+```
 
 ### `status` — what's the broker doing?
 
@@ -379,9 +396,11 @@ v-rpc debug status $ENG                                   # 7. confirm: level 1 
 
 ### B. Real CPRS — capture a live login + chart sweep
 
-CPRS runs in the VM; `v-rpc` runs on the host. (If CPRS can't reach vehu's
-loopback broker, front it with a relay — see the `vehu-broker-vbox-relay` note;
-CPRS then connects to `10.0.2.2:19431`.)
+CPRS runs in the VM; `v-rpc` runs on the host. **Before launching CPRS, make sure
+the network path is healthy** — run `v rpc doctor` and, if it says so, start the
+relay (see [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking) below).
+With the path green, CPRS connects to the address `doctor` prints (vehu:
+`s=10.0.2.2 p=19431`).
 
 ```bash
 export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb
@@ -406,6 +425,54 @@ v-rpc debug status $ENG                                   # level 1 (off), 0 buf
 ```
 
 > Capture files (`*.ldjson`) are git-ignored — they're data, not source.
+
+### Connecting CPRS to vehu (networking)
+
+CPRS-in-a-VM reaching VistA-in-Docker is the single most error-prone step, and it
+always fails the same opaque way: CPRS shows **`WSAECONNREFUSED / WASConnectByName`**.
+The cause is almost always that the broker is published to the host's **loopback
+only** (Docker `127.0.0.1:9430`), which a VM cannot reach — so the path needs a
+relay on a reachable interface. `v rpc doctor` diagnoses the whole chain and tells
+you exactly what to do; `v rpc relay` is the fix.
+
+```bash
+v-rpc doctor                     # walk docker -> publish mode -> broker -> relay; prints the CPRS address
+```
+
+A healthy run ends with `path looks good` and the line to type into CPRS:
+
+```
+✓ docker           vehu is running (image worldvista/vehu)
+⚠ broker publish   published on 127.0.0.1:9430 — bound to loopback, so a VM cannot reach it directly
+✓ broker listener  [XWB] handshake on 127.0.0.1:9430 replied 9 bytes (listener live)
+✓ relay            relay on 0.0.0.0:19431 forwards to the broker
+CPRS should connect to:  10.0.2.2:19431   (s=10.0.2.2 p=19431)
+```
+
+If the **relay** line is ✗, start it — either let `doctor` do it, or run it directly:
+
+```bash
+v-rpc doctor --fix               # start the relay if needed, then re-check
+# or:
+v-rpc relay --install            # persistent user service (starts on boot)
+v-rpc relay                      # or just run it in the foreground (Ctrl-C to stop)
+v-rpc relay --status             # is it listening / installed / active?
+```
+
+`v rpc relay` is a built-in TCP forwarder (no `socat` needed): it discovers the
+broker port from `docker inspect` and republishes it on `0.0.0.0:19431` so the VM
+can reach it. `--install` writes a `systemd --user` unit (`loginctl enable-linger`
+to run it without a login session). It never touches vehu or VistA — pure
+host-side port forwarding.
+
+**In CPRS**, set the server/port to what `doctor` printed (vehu via VirtualBox NAT
+= `s=10.0.2.2 p=19431`). The cleanest launch is a Windows shortcut with the args
+**outside** the path quotes: `Target: "…\CPRSChart.exe" s=10.0.2.2 p=19431`.
+
+> **Prefer to skip the relay entirely?** `doctor` will also tell you: re-run the
+> container publishing the broker on all interfaces (`-p 0.0.0.0:9430:9430`) and
+> the VM can reach `10.0.2.2:9430` directly — no relay. The relay is the
+> non-invasive option when you can't change how the container is started.
 
 ## 7. Comparing against the VSL tap
 
@@ -453,7 +520,7 @@ tool — `v rpc debug` only produces the comparable oracle output.
 | Level didn't restore (still `ON`) | Either a hard-kill (`kill -9`) skipped the restore, or an **overlapping run**: `tail`/`capture` restore to the level they *found* at start, so if one started while another already armed level 2, it leaves it at 2. Fix: `v rpc debug disarm`, or run with `--restore-to 1` to force stock on exit. |
 | Buffered lines won't go away | They auto-purge in ~7 days; to wipe now use `v rpc debug clear` (or start a `tail`/`capture` without `--no-clear`). |
 | Capture file empty | The workload ran outside the capture window, or every connection was wiped between polls — lower `--interval`, or arm first and capture with `--no-clear`. |
-| CPRS can't reach vehu | vehu's broker is published loopback-only; front it with a host relay so the VM can reach it (`vehu-broker-vbox-relay` note). |
+| CPRS can't reach vehu (`WSAECONNREFUSED`) | Run `v rpc doctor` — it pinpoints the broken hop. Usually the broker is published loopback-only and the relay is down: `v rpc doctor --fix` (or `v rpc relay --install`). See [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking). |
 
 ## References
 

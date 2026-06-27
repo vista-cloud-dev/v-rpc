@@ -1,6 +1,6 @@
 ---
 title: v-rpc network doctor + built-in relay — make CPRS↔VistA "just work"
-status: draft
+status: accepted
 version: v0.1.0
 created: 2026-06-27
 last_modified: 2026-06-27
@@ -9,6 +9,12 @@ layer: v
 ---
 
 # `v rpc doctor` + `v rpc relay` — a transparent, portable fix for the CPRS↔VistA network path
+
+> **Status: IMPLEMENTED 2026-06-27** (owner-authorized build). `v rpc doctor` +
+> `v rpc relay` are live and verified against vehu end-to-end. See the increment
+> tracker (`docs/v-rpc-implementation-plan.md`) and
+> `docs/memory/v-rpc-doctor-relay.md`. The three **Open questions** below remain
+> for owner confirmation but did not block the build.
 
 ## The problem
 

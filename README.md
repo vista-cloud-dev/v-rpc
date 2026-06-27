@@ -21,6 +21,16 @@ separately**; this tool only produces comparable output (LDJSON whose fields —
 
 ## Commands
 
+**Connect** — get CPRS talking to VistA (the most common stumbling block):
+
+```
+v rpc doctor                                           # diagnose the CPRS↔VistA network path; print the fix + CPRS address
+v rpc doctor --fix                                     # ...and start the relay if it's needed and missing
+v rpc relay  --install                                 # built-in TCP forwarder (no socat); persistent systemd --user service
+```
+
+**Capture** — `v rpc debug`, the XWBDEBUG tap:
+
 ```
 v rpc debug status   --engine ydb --container vehu     # current XWBDEBUG level + buffered jobs
 v rpc debug tail     --engine ydb --container vehu     # live viewer in the terminal (Ctrl-C)
@@ -50,6 +60,10 @@ development (has data), IRIS-VistA for VA validation. The connection
 - `internal/xwblog` — pure parse/record/LDJSON/dedup (no engine dependency).
 - `internal/capture` — arm/disarm + poll-read + dedup, over a small `Execer`
   interface (fake-tested).
+- `internal/relay` — dependency-free TCP forwarder (replaces ad-hoc socat).
+- `internal/netcheck` — pure `doctor` check ladder over injected Docker + Prober
+  seams (fake-tested; the real adapters — `docker inspect`, the `[XWB]` probe —
+  live in `rpccli`).
 - `rpccli` — the clikit command surface; adapts `mdriver.Client` to `Execer`. The
   importable package the `v` umbrella mounts as `v rpc`.
 - `main.go` — the standalone `v-rpc` binary.

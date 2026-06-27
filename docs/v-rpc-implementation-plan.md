@@ -77,6 +77,17 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
   (`VRPC_*`); `--engine` defaults to `ydb`; driver auto-located next to `v-rpc` on
   PATH (no `M_<ENGINE>_BIN`); `make install`. Net: only `VRPC_CONTAINER` needed,
   `v-rpc debug status` runs fully flagless. Verified against vehu.
+- [x] **Connect verbs — `v rpc doctor` + `v rpc relay` (2026-06-27)** — make the
+  CPRS↔VistA broker network path self-diagnosing/self-fixing instead of tribal
+  socat knowledge. TDD leaf-first: `internal/relay` (TCP forwarder, 95.8%) +
+  `internal/netcheck` (pure ladder over injected Docker+Prober, 86.8%); real
+  adapters (`docker inspect`, `[XWB]` probe) in `rpccli/netadapters.go`. `doctor`
+  walks docker→publish-mode→listener→relay with per-hop fixes + the CPRS address;
+  `--fix` starts the relay. `relay` = built-in forwarder (no socat) with
+  `--install` (systemd --user). Live-verified against vehu end-to-end; replaced
+  the hand-made relay service. Also fixed the Makefile `BIN` trailing-space bug.
+  Proposal: `docs/proposals/v-rpc-network-doctor.md`. See
+  `docs/memory/v-rpc-doctor-relay.md`. Owner: confirm the 3 proposal questions.
 
 ## Non-goals (this repo)
 
