@@ -3,7 +3,7 @@ title: v-rpc user guide — viewing and saving live RPC traffic with `v rpc debu
 status: draft
 version: v0.1.0
 created: 2026-06-26
-last_modified: 2026-06-26
+last_modified: 2026-06-27
 doc_type: [GUIDE]
 layer: v
 ---
@@ -271,7 +271,7 @@ A few top-level commands describe the tool itself — none of them touch an engi
 so they work with no driver, container, or Docker:
 
 ```bash
-v-rpc menu             # browse the whole command/flag surface interactively (palette)
+v-rpc menu             # browse the command surface interactively (palette)
 v-rpc version          # show version and build info
 v-rpc schema | jq .    # emit the command/flag/enum tree as JSON (agent/script discovery)
 v-rpc install-completions   # install shell tab-completion
@@ -280,8 +280,34 @@ v-rpc install-completions   # install shell tab-completion
 `menu` and `version` show in `--help`; `schema` and `install-completions` are
 **hidden** from the help listing (machine/one-time use) but remain fully runnable.
 `schema` is the machine-readable contract for the entire CLI (every command, flag,
-default, and enum), handy for scripting or for an agent discovering the surface;
-`menu` is the same surface as a keyboard-driven palette.
+default, and enum) — handy for scripting or for an agent discovering the surface.
+
+#### `menu` — the interactive palette
+
+`v-rpc menu` opens a full-screen, keyboard-driven palette over the tool's own
+command tree — the fastest way to discover what's available without memorizing
+flags. It draws a breadcrumb of where you are, the commands grouped by category
+(**CAPTURE**, **COMMANDS**, …), and a one-line detail strip for whatever the
+cursor is on: the full command path, a short summary, and a status badge —
+`[runnable]` (green), `[needs args]` (blue), or `[group]` (gray, descends into
+sub-commands).
+
+| Key | Action |
+|---|---|
+| `←↑↓→` (or `h j k l`) | Move the cursor between categories and commands |
+| `⏎` Enter | Descend into a group, or open the focused command (shows its help/flags) |
+| `⌫` Backspace | Go back up one level |
+| `/` | Fuzzy-filter the surface by typing; `⏎`/`Esc` ends filtering |
+| `q` (or `Esc` / `Ctrl-C`) | Quit the palette |
+
+So a typical browse is: `v-rpc menu` → arrow onto **debug** (a `[group]`) → `⏎`
+to descend → land on `capture` to read its summary and badge → `⏎` to see its
+flags. Nothing runs against the engine until you actually invoke a command on the
+command line.
+
+Run on a **non-interactive** stdout (no TTY — e.g. piped or redirected), `menu`
+prints the full styled help instead of the live palette, so `v-rpc menu | less`
+still gives you a readable overview.
 
 ## 5. Common flags
 
