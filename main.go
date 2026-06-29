@@ -1,4 +1,4 @@
-// Command v-rpc is the standalone form of the `v rpc` domain — VistA RPC
+// Command v-rpc-debug is the standalone form of the `v rpc` domain — VistA RPC
 // developer tools. Today it carries `v rpc debug`, which taps the RPC Broker's
 // native XWBDEBUG log over the m engine seam (mdriver.Client) to view live RPC
 // traffic in the terminal or save it to a file as LDJSON for offline comparison
@@ -7,12 +7,12 @@
 //
 // Try:
 //
-//	v-rpc debug status  --engine ydb --container vehu
-//	v-rpc debug tail    --engine ydb --container vehu
-//	v-rpc debug capture --engine ydb --container vehu --out rpc.ldjson
-//	v-rpc debug arm     --engine ydb --container vehu
-//	v-rpc debug disarm  --engine ydb --container vehu
-//	v-rpc schema | jq .
+//	v-rpc-debug debug status  --engine ydb --container vehu
+//	v-rpc-debug debug tail    --engine ydb --container vehu
+//	v-rpc-debug debug capture --engine ydb --container vehu --out rpc.ldjson
+//	v-rpc-debug debug arm     --engine ydb --container vehu
+//	v-rpc-debug debug disarm  --engine ydb --container vehu
+//	v-rpc-debug schema | jq .
 package main
 
 import (
@@ -21,10 +21,10 @@ import (
 	"github.com/willabides/kongplete"
 
 	"github.com/vista-cloud-dev/clikit"
-	"github.com/vista-cloud-dev/v-rpc/rpccli"
+	"github.com/vista-cloud-dev/v-rpc-debug/rpccli"
 )
 
-// CLI is the standalone v-rpc grammar: the rpccli verbs at the top level, plus
+// CLI is the standalone v-rpc-debug grammar: the rpccli verbs at the top level, plus
 // the shared clikit meta commands.
 type CLI struct {
 	clikit.Globals
@@ -40,7 +40,7 @@ type CLI struct {
 func main() {
 	cli := &CLI{}
 	os.Exit(clikit.Run(
-		"v-rpc",
+		"v-rpc-debug",
 		"VistA RPC developer tools — tap the RPC Broker debug log (view / save).",
 		cli, &cli.Globals,
 	))

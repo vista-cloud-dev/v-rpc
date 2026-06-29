@@ -1,4 +1,4 @@
-# v-rpc — the `v rpc` domain
+# v-rpc-debug — the `v rpc` domain
 
 VistA RPC developer tools. Today it carries **`v rpc debug`**, which taps the RPC
 Broker's *native* `XWBDEBUG` log over the **m engine driver seam** to view live
@@ -66,7 +66,7 @@ development (has data), IRIS-VistA for VA validation. The connection
   live in `rpccli`).
 - `rpccli` — the clikit command surface; adapts `mdriver.Client` to `Execer`. The
   importable package the `v` umbrella mounts as `v rpc`.
-- `main.go` — the standalone `v-rpc` binary.
+- `main.go` — the standalone `v-rpc-debug` binary.
 
 Engine access is **only** through `mdriver.Client` (the m-driver-sdk seam,
 waterline rule 3) — never raw `docker exec`. Layer `v`.
@@ -75,14 +75,14 @@ waterline rule 3) — never raw `docker exec`. Layer `v`.
 
 ```
 make check                       # gofmt + lint + race tests + build (pre-commit gate)
-make build                       # -> dist/v-rpc
+make build                       # -> dist/v-rpc-debug
 make install BINDIR=~/scripts/bin   # install onto PATH
 ```
 
-`v-rpc` is one static binary. Put the `m-ydb`/`m-iris` driver in the **same** PATH
-directory and `v-rpc` auto-locates it (no `M_<ENGINE>_BIN` needed). Then the only
+`v-rpc-debug` is one static binary. Put the `m-ydb`/`m-iris` driver in the **same** PATH
+directory and `v-rpc-debug` auto-locates it (no `M_<ENGINE>_BIN` needed). Then the only
 config is the container — `export VRPC_CONTAINER=vehu` (engine defaults to `ydb`,
-transport to `docker`) and run flagless: `v-rpc debug status`. See the
+transport to `docker`) and run flagless: `v-rpc-debug debug status`. See the
 [user guide §1](docs/v-rpc-user-guide.md#1-setup-one-time).
 
 Caveat (inherent to XWBDEBUG): `^XTMP("XWBLOG"_$J)` is per-handler and wiped at

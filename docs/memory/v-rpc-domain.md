@@ -1,11 +1,11 @@
 ---
 name: v-rpc-domain
-description: v-rpc is a new Go `v` domain (`v rpc debug`) that taps the RPC Broker's native XWBDEBUG log over the m-driver-sdk seam to view/save live RPC traffic for offline comparison against the VSL tap. Built 2026-06-26; v-cli mount deferred until the repo is published+tagged.
+description: v-rpc-debug is a new Go `v` domain (`v rpc debug`) that taps the RPC Broker's native XWBDEBUG log over the m-driver-sdk seam to view/save live RPC traffic for offline comparison against the VSL tap. Built 2026-06-26; v-cli mount deferred until the repo is published+tagged.
 metadata:
   type: project
 ---
 
-**v-rpc created 2026-06-26.** A new repo under vista-cloud-dev: the `v rpc`
+**v-rpc-debug created 2026-06-26.** A new repo under vista-cloud-dev: the `v rpc`
 domain, Go, exports importable `rpccli` (the `v` umbrella will mount it as
 `v rpc`, mirroring v-pkg/pkgcli). Layer `v`. Headline capability **`v rpc debug`**
 taps the RPC Broker's *native* `XWBDEBUG` log (`^XTMP("XWBLOG"_$J)`) over the m
@@ -26,11 +26,11 @@ TUI later. Engine flags also read env (`VRPC_ENGINE`/`VRPC_TRANSPORT`/
 `.envrc` / shell rc) and omit the flags; a CLI flag overrides its env var.
 
 **MINIMAL CONFIG (2026-06-26):** driver auto-located by `mdriver.Locate` when the
-`m-ydb`/`m-iris` binary sits next to `v-rpc` on PATH (rule: $M_<ENGINE>_BIN → exe-dir
+`m-ydb`/`m-iris` binary sits next to `v-rpc-debug` on PATH (rule: $M_<ENGINE>_BIN → exe-dir
 → sibling dist/ → PATH) — so co-install both via `make install BINDIR=…` + drop the
 driver in the same dir, and **no `M_<ENGINE>_BIN` needed**. With engine defaulting to
 ydb + transport docker, the ONLY irreducible config is the container
-(`VRPC_CONTAINER`); `v-rpc debug status` then runs fully flagless. Verified.
+(`VRPC_CONTAINER`); `v-rpc-debug debug status` then runs fully flagless. Verified.
 
 **Architecture (waterline-clean):** `internal/xwblog` = pure parse/record/LDJSON/
 dedup (no engine dep, TDD); `internal/capture` = arm/disarm + poll + dedup over a
@@ -64,7 +64,7 @@ clear` wipes the buffered `^XTMP("XWBLOG"*)` on demand (it otherwise auto-purges
 ~7 days).
 
 **OWED (owner):**
-1. `gh repo create vista-cloud-dev/v-rpc` + push `main` (repo creation is the
+1. `gh repo create vista-cloud-dev/v-rpc-debug` + push `main` (repo creation is the
    owner's step per org convention).
 2. ✅ DONE 2026-06-26 — live-validated against real CPRS (see VALIDATED above).
 3. ✅ **I5 DONE 2026-06-26: mounted into v-cli.** Added `rpccli.Contract()`
@@ -72,7 +72,7 @@ clear` wipes the buffered `^XTMP("XWBLOG"*)` on demand (it otherwise auto-purges
    `ContractVersion="1.0"`, imports `v-pkg/vcontract` for the shared `Manifest`
    type — a v→v dep, waterline-OK). Repinned clikit v0.4.0 + added the shared
    discovery surface to the standalone (`explore`/`schema`/`version` under
-   Introspect, `debug` under a Capture group). Tagged **v-rpc v0.1.0**; v-cli now
+   Introspect, `debug` under a Capture group). Tagged **v-rpc-debug v0.1.0**; v-cli now
    has `Rpc rpccli.Commands` (group Domains) + `rpccli.Contract()` in
    `buildRegistry()` (golden `dist/v-registry.json` regenerated). `v rpc <verb>`
    live on PATH. **GOTCHA:** fetching a fresh private-repo tag needs

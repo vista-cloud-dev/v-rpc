@@ -1,4 +1,4 @@
-# v-rpc docs
+# v-rpc-debug docs
 
 The `v rpc` domain — a debug/validation tool that taps the RPC Broker's native
 `XWBDEBUG` log over the m-driver-sdk seam (`v rpc debug`), plus the CPRS↔VistA
@@ -6,9 +6,9 @@ network helpers (`v rpc doctor` / `v rpc relay`).
 
 ## Key docs
 
-- [v-rpc user guide](v-rpc-user-guide.md) — how to view and save live RPC traffic
+- [v-rpc-debug user guide](v-rpc-user-guide.md) — how to view and save live RPC traffic
   with `v rpc debug`, and connect CPRS to vehu (`doctor`/`relay`).
-- [v-rpc implementation plan](v-rpc-implementation-plan.md) — design + the live
+- [v-rpc-debug implementation plan](v-rpc-implementation-plan.md) — design + the live
   increment tracker (Tier-D).
 
 ## Folders

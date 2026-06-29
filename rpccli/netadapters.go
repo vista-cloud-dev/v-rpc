@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vista-cloud-dev/v-rpc/internal/netcheck"
-	"github.com/vista-cloud-dev/v-rpc/internal/xwbwire"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/netcheck"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/xwbwire"
 )
 
 // xwbProber is the real netcheck.Prober: it dials a broker (directly or through

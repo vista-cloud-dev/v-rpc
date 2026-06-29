@@ -1,10 +1,10 @@
-# v-rpc — the `v rpc` domain (RPC Broker debug tap). Build conventions inherited
+# v-rpc-debug — the `v rpc` domain (RPC Broker debug tap). Build conventions inherited
 # from go-cli-template: static (CGO_ENABLED=0), -trimpath, version stamped via
 # -ldflags, cross-compile matrix, lint, test, schema.
 
 # BIN: the v rpc domain CLI (standalone).
-BIN     ?= v-rpc
-PKG     := github.com/vista-cloud-dev/v-rpc
+BIN     ?= v-rpc-debug
+PKG     := github.com/vista-cloud-dev/v-rpc-debug
 # Version is stamped into the shared clikit module.
 LDPKG   := github.com/vista-cloud-dev/clikit
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -58,12 +58,12 @@ dist:
 	done
 
 # Install the static binary onto PATH. Co-locate the m-<engine> driver in the
-# same BINDIR and v-rpc auto-finds it (driver-contract §4) — no M_<ENGINE>_BIN.
+# same BINDIR and v-rpc-debug auto-finds it (driver-contract §4) — no M_<ENGINE>_BIN.
 install: build
 	@mkdir -p "$(BINDIR)"
 	install -m 0755 dist/$(BIN) "$(BINDIR)/$(BIN)"
 	@echo "installed $(BIN) -> $(BINDIR)/$(BIN)"
-	@echo "tip: also put m-ydb / m-iris in $(BINDIR) so v-rpc locates the driver automatically."
+	@echo "tip: also put m-ydb / m-iris in $(BINDIR) so v-rpc-debug locates the driver automatically."
 
 clean:
 	rm -f dist/$(BIN) dist/$(BIN)-* *.test

@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vista-cloud-dev/v-rpc/internal/xwblog"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/xwblog"
 )
 
 // Execer runs a single M command against a live engine and returns its captured

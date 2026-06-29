@@ -10,7 +10,7 @@ layer: v
 
 # v-rpc-tap — durable RPC-broker tap → S3 (moved)
 
-This proposal is **cross-cutting** (spans v-stdlib, v-pkg, v-rpc, and a new
+This proposal is **cross-cutting** (spans v-stdlib, v-pkg, v-rpc-debug, and a new
 `v-rpc-tap` module), so the canonical, comprehensive version now lives in the
 shared `docs` repo:
 

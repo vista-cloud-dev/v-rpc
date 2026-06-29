@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/vista-cloud-dev/clikit"
-	"github.com/vista-cloud-dev/v-rpc/internal/netcheck"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/netcheck"
 )
 
 // doctorCmd walks the CPRS→VistA connection path and reports each hop with a
 // plain-language diagnosis and the exact fix. It reuses the same two seams the
-// rest of v-rpc uses: `docker inspect` (engine-side state) and an [XWB] socket
+// rest of v-rpc-debug uses: `docker inspect` (engine-side state) and an [XWB] socket
 // probe (the `ping` wire path). With --fix it starts the host relay and prints
 // the CPRS connection string. It never modifies VistA, the container, or the VM.
 type doctorCmd struct {

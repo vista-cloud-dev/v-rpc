@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/vista-cloud-dev/clikit"
-	"github.com/vista-cloud-dev/v-rpc/internal/relay"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/relay"
 )
 
 const relayService = "v-rpc-relay.service"
@@ -189,7 +189,7 @@ func writeUserUnit(exe, listen, to string) (string, error) {
 		return "", err
 	}
 	unit := fmt.Sprintf(`[Unit]
-Description=v-rpc relay (host %s -> VistA broker %s) — republishes the loopback-bound broker for a VM client
+Description=v-rpc-debug relay (host %s -> VistA broker %s) — republishes the loopback-bound broker for a VM client
 After=network-online.target docker.service
 Wants=network-online.target
 

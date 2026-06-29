@@ -1,4 +1,4 @@
-module github.com/vista-cloud-dev/v-rpc
+module github.com/vista-cloud-dev/v-rpc-debug
 
 go 1.26.3
 

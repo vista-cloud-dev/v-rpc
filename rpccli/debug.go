@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/vista-cloud-dev/clikit"
-	"github.com/vista-cloud-dev/v-rpc/internal/capture"
-	"github.com/vista-cloud-dev/v-rpc/internal/xwblog"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/capture"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/xwblog"
 )
 
 // debugCmd groups the XWBDEBUG tap verbs. Capture is debug-grade and names-only

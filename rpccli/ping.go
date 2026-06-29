@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/vista-cloud-dev/clikit"
-	"github.com/vista-cloud-dev/v-rpc/internal/xwbwire"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/xwbwire"
 )
 
 // defaultPingRPCs are harmless no-arg RPCs the broker logs by name then rejects

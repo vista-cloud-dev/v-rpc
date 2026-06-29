@@ -1,5 +1,5 @@
 ---
-title: v-rpc network doctor + built-in relay — make CPRS↔VistA "just work"
+title: v-rpc-debug network doctor + built-in relay — make CPRS↔VistA "just work"
 status: accepted
 version: v0.1.0
 created: 2026-06-27
@@ -52,7 +52,7 @@ explain it.
 
 ## Recommendation
 
-Add two verbs to the `v rpc` domain. They reuse what v-rpc already has — the
+Add two verbs to the `v rpc` domain. They reuse what v-rpc-debug already has — the
 **driver seam** (engine-side checks, as `status`/`tail` do) and the **`xwbwire`
 [XWB] client** (socket-side checks, as `ping` does) — so they are a natural
 extension, not a new subsystem.
@@ -63,7 +63,7 @@ Replace ad-hoc `socat` with ~30 lines of Go (`net.Listen` + bidirectional
 `io.Copy`, one goroutine per connection). Why built-in:
 
 - **No external dependency.** socat isn't on every machine; Go stdlib is in the
-  binary. The next user needs nothing but `v-rpc`.
+  binary. The next user needs nothing but `v-rpc-debug`.
 - **Portable.** The next user may be on macOS or WSL; one Go forwarder covers all.
 - **Discoverable backend.** Default `--to` is *read from the live docker publish
   binding*, not hardcoded — so it adapts to whatever container/port the user has.
@@ -142,21 +142,21 @@ knowledge, no AI required.
 - **Portable** — no socat/external deps; relay is Go stdlib; persistence generated
   per-OS; ports discovered, not assumed. Works for a fresh machine.
 - **Reuses the domain** — driver-seam checks + `xwbwire` client already exist in
-  v-rpc; doctor/relay sit naturally beside `ping`.
+  v-rpc-debug; doctor/relay sit naturally beside `ping`.
 - **Educational** — doctor names the *root cause* (loopback publish) and offers
   both the principled fix (republish `0.0.0.0`, no relay) and the non-invasive one
   (relay), so the user understands the topology.
 
 ## Open questions (for the owner)
 
-1. **Waterline / rule 3.** v-rpc already reaches the broker socket directly via
+1. **Waterline / rule 3.** v-rpc-debug already reaches the broker socket directly via
    `ping` (`xwbwire`), *not* through the driver seam — the transport monopoly
    governs **M-engine execution**, not being a dumb RPC client / byte-forwarder.
    `relay`/`doctor` extend that already-accepted pattern; confirm that reading is
    fine. (See [[engine-access-through-driver-stack]] / the m/v waterline ADR.)
 2. **Home for the tools.** `relay`/`doctor` are host-network tools wearing the
    `v rpc` hat because they're specific to the VistA broker path. Confirm they
-   belong in v-rpc vs a generic host tool.
+   belong in v-rpc-debug vs a generic host tool.
 3. **Scope of `--fix`.** Confirm auto-start-relay is the only auto-fix; everything
    else stays advisory (never re-run the vehu container automatically).
 

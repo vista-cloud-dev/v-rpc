@@ -1,5 +1,5 @@
 ---
-title: v-rpc user guide — viewing and saving live RPC traffic with `v rpc debug`
+title: v-rpc-debug user guide — viewing and saving live RPC traffic with `v rpc debug`
 status: draft
 version: v0.1.0
 created: 2026-06-26
@@ -8,7 +8,7 @@ doc_type: [GUIDE]
 layer: v
 ---
 
-# v-rpc user guide — `v rpc debug`
+# v-rpc-debug user guide — `v rpc debug`
 
 `v rpc debug` shows you the RPCs flowing through a VistA RPC Broker, live in your
 terminal, and can save them to a file for later analysis. It does this with the
@@ -46,18 +46,18 @@ Use it to answer questions like:
 
 ## 1. Setup (one time)
 
-`v-rpc` is a single static binary. It reaches the engine **only** through the
+`v-rpc-debug` is a single static binary. It reaches the engine **only** through the
 m-driver-sdk seam, so it needs the `m-<engine>` driver binary reachable — the one
 external dependency. Put both binaries on your `PATH` **in the same directory** and
-`v-rpc` locates the driver automatically (driver-contract §4) — **no `M_<ENGINE>_BIN`
+`v-rpc-debug` locates the driver automatically (driver-contract §4) — **no `M_<ENGINE>_BIN`
 to set**:
 
 ```bash
-cd ~/vista-cloud-dev/v-rpc && make install BINDIR=~/scripts/bin   # installs v-rpc
+cd ~/vista-cloud-dev/v-rpc-debug && make install BINDIR=~/scripts/bin   # installs v-rpc-debug
 install -m755 ~/vista-cloud-dev/m-ydb/dist/m-ydb ~/scripts/bin/   # co-locate the driver
 ```
 
-The only thing `v-rpc` can't guess is **which engine container** to talk to. Set it
+The only thing `v-rpc-debug` can't guess is **which engine container** to talk to. Set it
 once — engine defaults to `ydb`, transport to `docker`:
 
 ```bash
@@ -67,9 +67,9 @@ export VRPC_CONTAINER=vehu        # once per shell, or in the repo .envrc (diren
 That's the whole configuration. Everything is now flagless:
 
 ```bash
-v-rpc debug status
-v-rpc debug tail
-v-rpc debug capture --out rpc.ldjson
+v-rpc-debug debug status
+v-rpc-debug debug tail
+v-rpc-debug debug capture --out rpc.ldjson
 ```
 
 **Requirements:** Docker running with the target engine container up (e.g. `vehu`).
@@ -78,7 +78,7 @@ For IRIS, co-locate the `m-iris` driver and add `--engine iris` (or
 keep the driver somewhere else.
 
 Once mounted into the `v` umbrella, every command below is also available as
-`v rpc debug …`. Standalone, it is `v-rpc debug …` (the form used throughout).
+`v rpc debug …`. Standalone, it is `v-rpc-debug debug …` (the form used throughout).
 
 ## 2. Selecting the engine
 
@@ -92,8 +92,8 @@ override **nothing** (just set the container once, per §1):
 | `--container` | — | `VRPC_CONTAINER` | container/instance name; sets `M_<ENGINE>_CONTAINER` |
 
 ```bash
-v-rpc debug status                                    # ydb / docker / $VRPC_CONTAINER
-v-rpc debug status --engine iris --container foia-t12 # override ad hoc
+v-rpc-debug debug status                                    # ydb / docker / $VRPC_CONTAINER
+v-rpc-debug debug status --engine iris --container foia-t12 # override ad hoc
 ```
 
 (The connection — container, base URL, credentials — is otherwise read by the
@@ -115,16 +115,16 @@ the flags entirely:
 export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb     # driver location
 export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker VRPC_CONTAINER=vehu
 
-v-rpc debug status        # no --engine/--transport/--container needed
-v-rpc debug tail
-v-rpc debug capture --out rpc.ldjson
+v-rpc-debug debug status        # no --engine/--transport/--container needed
+v-rpc-debug debug tail
+v-rpc-debug debug capture --out rpc.ldjson
 ```
 
 A flag on the command line always **overrides** its env var, so you can keep ydb
 as the default and switch to IRIS ad hoc with `--engine iris`.
 
 **Make it persistent** with [direnv](https://direnv.net) — the house per-project
-env backbone. Add to `~/vista-cloud-dev/v-rpc/.envrc` (then `direnv allow`):
+env backbone. Add to `~/vista-cloud-dev/v-rpc-debug/.envrc` (then `direnv allow`):
 
 ```bash
 export M_YDB_BIN="$HOME/vista-cloud-dev/m-ydb/dist/m-ydb"
@@ -192,9 +192,9 @@ can reach it. Because this is the most common stumbling block, it has its own
 section: [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking).
 
 ```bash
-v-rpc doctor          # diagnose the path; prints the exact CPRS address (or the fix)
-v-rpc doctor --fix    # ...and start the relay if it's needed and missing
-v-rpc relay --install # persistent host relay (systemd --user); or `v-rpc relay` foreground
+v-rpc-debug doctor          # diagnose the path; prints the exact CPRS address (or the fix)
+v-rpc-debug doctor --fix    # ...and start the relay if it's needed and missing
+v-rpc-debug relay --install # persistent host relay (systemd --user); or `v-rpc-debug relay` foreground
 ```
 
 ### `status` — what's the broker doing?
@@ -202,7 +202,7 @@ v-rpc relay --install # persistent host relay (systemd --user); or `v-rpc relay`
 Read-only. Shows the current `XWBDEBUG` level and how much is buffered.
 
 ```bash
-v-rpc debug status --engine ydb --container vehu
+v-rpc-debug debug status --engine ydb --container vehu
 # engine ydb: XWBDEBUG level 1 (off); 0 log job(s), 0 RPC line(s) buffered
 ```
 
@@ -212,7 +212,7 @@ Arms `XWBDEBUG`, clears the log for a clean slate, then streams new RPC lines to
 your terminal until you press Ctrl-C. On exit it **restores the prior level**.
 
 ```bash
-v-rpc debug tail --engine ydb --container vehu
+v-rpc-debug debug tail --engine ydb --container vehu
 # [13:21:30] job     416  RPC: XWB IM HERE
 # [13:21:31] job     423  RPC: XUS INTRO MSG
 ```
@@ -225,7 +225,7 @@ Same as `tail`, but appends each record to a file as **LDJSON** (one JSON object
 per line). Use it to grab a sample for offline analysis.
 
 ```bash
-v-rpc debug capture --engine ydb --container vehu --out rpc.ldjson --duration 30s
+v-rpc-debug debug capture --engine ydb --container vehu --out rpc.ldjson --duration 30s
 ```
 
 Each line looks like:
@@ -245,7 +245,7 @@ broker logs each `RPC: <name>` then rejects it (no session); that's exactly what
 we want to see in the tap.
 
 ```bash
-v-rpc debug ping --addr 127.0.0.1:9430
+v-rpc-debug debug ping --addr 127.0.0.1:9430
 #   sent XWB IM HERE               (broker replied 52 bytes)
 #   sent XUS INTRO MSG             (broker replied 52 bytes)
 #   sent XWB GET VARIABLE VALUE    (broker replied 52 bytes)
@@ -268,8 +268,8 @@ these. Use them when you want `XWBDEBUG` left on across several separate steps
 (e.g. arm, run a client by hand, then capture with `--no-clear`).
 
 ```bash
-v-rpc debug arm    --engine ydb --container vehu          # set level 2 (names)
-v-rpc debug disarm --engine ydb --container vehu          # restore to level 1 (stock)
+v-rpc-debug debug arm    --engine ydb --container vehu          # set level 2 (names)
+v-rpc-debug debug disarm --engine ydb --container vehu          # restore to level 1 (stock)
 ```
 
 ### `clear` — wipe the buffered log
@@ -278,7 +278,7 @@ Kills all `^XTMP("XWBLOG"*)` nodes so the engine is pristine (the buffer otherwi
 auto-purges after ~7 days). Reports how many lines it removed.
 
 ```bash
-v-rpc debug clear --engine ydb --container vehu
+v-rpc-debug debug clear --engine ydb --container vehu
 # cleared 160 buffered XWBLOG line(s) on ydb
 ```
 
@@ -288,10 +288,10 @@ A few top-level commands describe the tool itself — none of them touch an engi
 so they work with no driver, container, or Docker:
 
 ```bash
-v-rpc menu             # browse the command surface interactively (palette)
-v-rpc version          # show version and build info
-v-rpc schema | jq .    # emit the command/flag/enum tree as JSON (agent/script discovery)
-v-rpc install-completions   # install shell tab-completion
+v-rpc-debug menu             # browse the command surface interactively (palette)
+v-rpc-debug version          # show version and build info
+v-rpc-debug schema | jq .    # emit the command/flag/enum tree as JSON (agent/script discovery)
+v-rpc-debug install-completions   # install shell tab-completion
 ```
 
 `menu` and `version` show in `--help`; `schema` and `install-completions` are
@@ -301,7 +301,7 @@ default, and enum) — handy for scripting or for an agent discovering the surfa
 
 #### `menu` — the interactive palette
 
-`v-rpc menu` opens a full-screen, keyboard-driven palette over the tool's own
+`v-rpc-debug menu` opens a full-screen, keyboard-driven palette over the tool's own
 command tree — the fastest way to discover what's available without memorizing
 flags. It draws a breadcrumb of where you are, the commands grouped by category
 (**CAPTURE**, **COMMANDS**, …), and a one-line detail strip for whatever the
@@ -317,13 +317,13 @@ sub-commands).
 | `/` | Fuzzy-filter the surface by typing; `⏎`/`Esc` ends filtering |
 | `q` (or `Esc` / `Ctrl-C`) | Quit the palette |
 
-So a typical browse is: `v-rpc menu` → arrow onto **debug** (a `[group]`) → `⏎`
+So a typical browse is: `v-rpc-debug menu` → arrow onto **debug** (a `[group]`) → `⏎`
 to descend → land on `capture` to read its summary and badge → `⏎` to see its
 flags. Nothing runs against the engine until you actually invoke a command on the
 command line.
 
 Run on a **non-interactive** stdout (no TTY — e.g. piped or redirected), `menu`
-prints the full styled help instead of the live palette, so `v-rpc menu | less`
+prints the full styled help instead of the live palette, so `v-rpc-debug menu | less`
 still gives you a readable overview.
 
 ## 5. Common flags
@@ -357,7 +357,7 @@ For `tail`, `-o json` streams the same LDJSON records `capture` writes — handy
 piping into `jq`:
 
 ```bash
-v-rpc debug tail --engine ydb --container vehu -o json | jq -r .rpc
+v-rpc-debug debug tail --engine ydb --container vehu -o json | jq -r .rpc
 ```
 
 ### ⚠️ PHI warning — level 2 vs 3
@@ -378,10 +378,10 @@ them, then leaves the engine pristine (level 1, log cleared):
 export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb
 ENG="--engine ydb --transport docker --container vehu"
 
-v-rpc debug status $ENG                                   # 1. baseline (level 1, off)
-v-rpc debug arm    $ENG                                   # 2. arm capture (level 2)
-v-rpc debug ping   --addr 127.0.0.1:9430                  # 3. fire real RPCs at the broker
-v-rpc debug capture $ENG --out smoke.ldjson \
+v-rpc-debug debug status $ENG                                   # 1. baseline (level 1, off)
+v-rpc-debug debug arm    $ENG                                   # 2. arm capture (level 2)
+v-rpc-debug debug ping   --addr 127.0.0.1:9430                  # 3. fire real RPCs at the broker
+v-rpc-debug debug capture $ENG --out smoke.ldjson \
       --no-clear --duration 2s --restore-to 1            # 4. save buffered RPCs -> file, restore to 1
 
 # 5. examine the output
@@ -390,13 +390,13 @@ jq -r '.rpc' smoke.ldjson                                 # just the RPC names
 jq -r '"\(.seq)\t\(.rpc)"' smoke.ldjson                   # seq + name, in order
 jq -s 'group_by(.rpc)|map({rpc:.[0].rpc,n:length})|sort_by(-.n)' smoke.ldjson  # counts
 
-v-rpc debug clear  $ENG                                   # 6. wipe the buffered log
-v-rpc debug status $ENG                                   # 7. confirm: level 1 (off), 0 buffered
+v-rpc-debug debug clear  $ENG                                   # 6. wipe the buffered log
+v-rpc-debug debug status $ENG                                   # 7. confirm: level 1 (off), 0 buffered
 ```
 
 ### B. Real CPRS — capture a live login + chart sweep
 
-CPRS runs in the VM; `v-rpc` runs on the host. **Before launching CPRS, make sure
+CPRS runs in the VM; `v-rpc-debug` runs on the host. **Before launching CPRS, make sure
 the network path is healthy** — run `v rpc doctor` and, if it says so, start the
 relay (see [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking) below).
 With the path green, CPRS connects to the address `doctor` prints (vehu:
@@ -407,7 +407,7 @@ export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb
 ENG="--engine ydb --transport docker --container vehu"
 
 # 1. start capturing (arms, clears, streams to file). Leave it running.
-v-rpc debug capture $ENG --out cprs-login.ldjson --restore-to 1
+v-rpc-debug debug capture $ENG --out cprs-login.ldjson --restore-to 1
 
 #   --- in the VM: launch CPRS, sign in as PROVIDER,VERO (CAS123;CAS123..),
 #       open patient TEN,PATIENT, click through the chart tabs ---
@@ -420,8 +420,8 @@ jq -r '"\(.seq)\t\(.rpc)"' cprs-login.ldjson | head -20         # the sign-on se
 jq -s 'group_by(.rpc)|map({rpc:.[0].rpc,n:length})|sort_by(-.n)|.[:20]' cprs-login.ldjson
 
 # 4. clean up
-v-rpc debug clear  $ENG
-v-rpc debug status $ENG                                   # level 1 (off), 0 buffered
+v-rpc-debug debug clear  $ENG
+v-rpc-debug debug status $ENG                                   # level 1 (off), 0 buffered
 ```
 
 > Capture files (`*.ldjson`) are git-ignored — they're data, not source.
@@ -436,7 +436,7 @@ relay on a reachable interface. `v rpc doctor` diagnoses the whole chain and tel
 you exactly what to do; `v rpc relay` is the fix.
 
 ```bash
-v-rpc doctor                     # walk docker -> publish mode -> broker -> relay; prints the CPRS address
+v-rpc-debug doctor                     # walk docker -> publish mode -> broker -> relay; prints the CPRS address
 ```
 
 A healthy run ends with `path looks good` and the line to type into CPRS:
@@ -452,11 +452,11 @@ CPRS should connect to:  10.0.2.2:19431   (s=10.0.2.2 p=19431)
 If the **relay** line is ✗, start it — either let `doctor` do it, or run it directly:
 
 ```bash
-v-rpc doctor --fix               # start the relay if needed, then re-check
+v-rpc-debug doctor --fix               # start the relay if needed, then re-check
 # or:
-v-rpc relay --install            # persistent user service (starts on boot)
-v-rpc relay                      # or just run it in the foreground (Ctrl-C to stop)
-v-rpc relay --status             # is it listening / installed / active?
+v-rpc-debug relay --install            # persistent user service (starts on boot)
+v-rpc-debug relay                      # or just run it in the foreground (Ctrl-C to stop)
+v-rpc-debug relay --status             # is it listening / installed / active?
 ```
 
 `v rpc relay` is a built-in TCP forwarder (no `socat` needed): it discovers the

@@ -1,5 +1,5 @@
 ---
-title: v-rpc implementation plan — the `v rpc debug` RPC-tap viewer/capture
+title: v-rpc-debug implementation plan — the `v rpc debug` RPC-tap viewer/capture
 status: draft
 version: v0.1.0
 created: 2026-06-26
@@ -8,7 +8,7 @@ doc_type: [PLAN]
 layer: v
 ---
 
-# v-rpc — `v rpc debug` (RPC Broker debug tap: view + save)
+# v-rpc-debug — `v rpc debug` (RPC Broker debug tap: view + save)
 
 ## Purpose
 
@@ -29,7 +29,7 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
 
 | Decision | Choice |
 |---|---|
-| Repo | `v-rpc` (new), exports importable `rpccli`; `v` umbrella mounts `v rpc` |
+| Repo | `v-rpc-debug` (new), exports importable `rpccli`; `v` umbrella mounts `v rpc` |
 | Command group | `v rpc debug …` (scoped — `v rpc` will carry other verbs later) |
 | Verbs | `tail` (live CLI viewer), `capture --out file://…` (LDJSON), `status`, `arm`/`disarm` |
 | Viewer | CLI now; structured so a TUI drops in later |
@@ -74,9 +74,9 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
   published, tagged repo; v-cli pins versions, no `replace`).
 
 - [x] **Minimal config / portability (2026-06-26)** — engine flags read env
-  (`VRPC_*`); `--engine` defaults to `ydb`; driver auto-located next to `v-rpc` on
+  (`VRPC_*`); `--engine` defaults to `ydb`; driver auto-located next to `v-rpc-debug` on
   PATH (no `M_<ENGINE>_BIN`); `make install`. Net: only `VRPC_CONTAINER` needed,
-  `v-rpc debug status` runs fully flagless. Verified against vehu.
+  `v-rpc-debug debug status` runs fully flagless. Verified against vehu.
 - [x] **Connect verbs — `v rpc doctor` + `v rpc relay` (2026-06-27)** — make the
   CPRS↔VistA broker network path self-diagnosing/self-fixing instead of tribal
   socat knowledge. TDD leaf-first: `internal/relay` (TCP forwarder, 95.8%) +

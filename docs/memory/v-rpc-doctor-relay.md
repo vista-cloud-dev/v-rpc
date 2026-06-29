@@ -45,13 +45,13 @@ no-arg `XWB IM HERE`, reuses `internal/xwbwire` — the same RPC-client wire pat
   case-insensitively or a missing container reads as "docker broken".
 - A live `xwbProber` must treat **0 reply bytes as failure** (docker proxy accepts
   the TCP but the M listener never answered) — else a dead listener reads as OK.
-- **Makefile bug fixed same day:** `BIN ?= v-rpc   # comment` baked trailing
+- **Makefile bug fixed same day:** `BIN ?= v-rpc-debug   # comment` baked trailing
   spaces into `BIN`, so `make build/install` produced a binary literally named
-  `v-rpc<spaces>`. Comment moved to its own line.
+  `v-rpc-debug<spaces>`. Comment moved to its own line.
 
-**Live end state (2026-06-27):** binary installed (PATH `v-rpc` is a symlink to the
+**Live end state (2026-06-27):** binary installed (PATH `v-rpc-debug` is a symlink to the
 repo-root build); the hand-made `vehu-broker-relay.service` was retired and replaced
-by `v-rpc relay --install` → `v-rpc-relay.service` (enabled, active, linger on).
+by `v-rpc-debug relay --install` → `v-rpc-relay.service` (enabled, active, linger on).
 `v rpc doctor` reports the path green; CPRS connects `s=10.0.2.2 p=19431`.
 
 **RELAY PROVEN AGAINST REAL CPRS (2026-06-27):** a real CPRS login through the

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	// Version is the declared SemVer of the v-rpc domain surface. It is a
+	// Version is the declared SemVer of the v-rpc-debug domain surface. It is a
 	// committed constant (distinct from the link-time build version reported by
 	// `version`) so the generated contract is drift-stable.
 	Version = "0.1.0"
@@ -18,8 +18,8 @@ const (
 	ContractVersion = "1.0"
 )
 
-// Contract returns the v-rpc domain contract manifest, reflected from the actual
-// rpccli command tree. It is what the standalone `v-rpc` can emit and what the
+// Contract returns the v-rpc-debug domain contract manifest, reflected from the actual
+// rpccli command tree. It is what the standalone `v-rpc-debug` can emit and what the
 // `v` umbrella aggregates into its registry — one source, so the manifest can
 // never drift from the real verbs.
 func Contract() vcontract.Manifest {
@@ -32,5 +32,5 @@ func Contract() vcontract.Manifest {
 		// The grammar is static; a failure here is a programming error.
 		panic("rpccli: build contract grammar: " + err.Error())
 	}
-	return vcontract.Build("rpc", Version, ContractVersion, k)
+	return vcontract.Build("rpc-debug", Version, ContractVersion, k)
 }

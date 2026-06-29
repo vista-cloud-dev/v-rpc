@@ -1,5 +1,5 @@
 // Package rpccli is the importable command surface of the `v rpc` domain. The
-// standalone v-rpc binary mounts it at the top level; the `v` umbrella mounts
+// standalone v-rpc-debug binary mounts it at the top level; the `v` umbrella mounts
 // the same structs as `v rpc <verb>` (the static-pinned composition v-pkg uses).
 //
 // Today it carries one group, `v rpc debug`, which taps the RPC Broker's native
@@ -15,7 +15,7 @@ import (
 
 	"github.com/vista-cloud-dev/clikit"
 	mdriver "github.com/vista-cloud-dev/m-driver-sdk"
-	"github.com/vista-cloud-dev/v-rpc/internal/capture"
+	"github.com/vista-cloud-dev/v-rpc-debug/internal/capture"
 )
 
 // Commands is the `v rpc` verb set, embedded by the umbrella and the standalone.
@@ -38,7 +38,7 @@ type engineConn struct {
 
 // execer resolves the m-<engine> driver (driver-contract §4) and returns the
 // capture.Execer backed by the shared reference Client — the seam's single
-// transport (waterline rule 3). v-rpc never hand-rolls transport.
+// transport (waterline rule 3). v-rpc-debug never hand-rolls transport.
 func (e engineConn) execer() (capture.Execer, *clikit.Error) {
 	if e.Container != "" {
 		_ = os.Setenv("M_"+strings.ToUpper(e.Engine)+"_CONTAINER", e.Container)
