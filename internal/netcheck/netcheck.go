@@ -1,4 +1,4 @@
-// Package netcheck is the pure check ladder behind `v rpc doctor`. It walks the
+// Package netcheck is the pure check ladder behind `v rpc-debug doctor`. It walks the
 // CPRS→VistA connection path — Docker container, broker publish mode, broker
 // listener, host relay — and returns one structured Check per hop, each with a
 // plain-language detail and the exact remediation. The whole ladder is pure
@@ -117,7 +117,7 @@ func Run(ctx context.Context, dk Docker, pr Prober, cfg Config) Report {
 	if loopback {
 		add(Check{"broker publish", StatusWarn,
 			fmt.Sprintf("published on %s:%d — bound to loopback, so a VM cannot reach it directly", pb.HostIP, pb.HostPort),
-			"a relay is required: `v rpc relay` (or republish the container on 0.0.0.0 to drop the relay)"})
+			"a relay is required: `v rpc-debug relay` (or republish the container on 0.0.0.0 to drop the relay)"})
 	} else {
 		add(Check{"broker publish", StatusOK,
 			fmt.Sprintf("published on %s:%d — reachable from a VM directly, no relay needed", hostLabel(pb.HostIP), pb.HostPort), ""})
@@ -143,7 +143,7 @@ func Run(ctx context.Context, dk Docker, pr Prober, cfg Config) Report {
 				"pass --relay HOST:PORT (default 0.0.0.0:19431)"})
 		} else if n, err := pr.Probe(ctx, relayProbe); err != nil {
 			add(Check{"relay", StatusFail, "nothing forwarding on " + cfg.RelayAddr,
-				"run `v rpc relay` (or `v rpc relay --install` for always-on)"})
+				"run `v rpc-debug relay` (or `v rpc-debug relay --install` for always-on)"})
 			_ = n
 		} else {
 			add(Check{"relay", StatusOK,

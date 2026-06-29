@@ -1,5 +1,5 @@
 ---
-title: v-rpc-debug user guide — viewing and saving live RPC traffic with `v rpc debug`
+title: v-rpc-debug user guide — viewing and saving live RPC traffic with `v rpc-debug`
 status: draft
 version: v0.1.0
 created: 2026-06-26
@@ -8,9 +8,9 @@ doc_type: [GUIDE]
 layer: v
 ---
 
-# v-rpc-debug user guide — `v rpc debug`
+# v-rpc-debug user guide — `v rpc-debug`
 
-`v rpc debug` shows you the RPCs flowing through a VistA RPC Broker, live in your
+`v rpc-debug` shows you the RPCs flowing through a VistA RPC Broker, live in your
 terminal, and can save them to a file for later analysis. It does this with the
 Broker's **own** debug facility (`XWBDEBUG`) — nothing is installed on the engine
 and nothing is patched; turning it on is a single parameter toggle that the tool
@@ -27,7 +27,7 @@ Use it to answer questions like:
 > pipeline. `XWBDEBUG` logs RPC **names** (not results, not request↔response
 > correlation), it can drop traffic under load (see [Limitations](#8-limitations)),
 > and it has no S3/egress. The durable, complete, egress-capable tap is the VSL
-> broker hook; `v rpc debug` is the zero-install **oracle** you check it against.
+> broker hook; `v rpc-debug` is the zero-install **oracle** you check it against.
 
 ## Contents
 
@@ -67,9 +67,9 @@ export VRPC_CONTAINER=vehu        # once per shell, or in the repo .envrc (diren
 That's the whole configuration. Everything is now flagless:
 
 ```bash
-v-rpc-debug debug status
-v-rpc-debug debug tail
-v-rpc-debug debug capture --out rpc.ldjson
+v-rpc-debug status
+v-rpc-debug tail
+v-rpc-debug capture --out rpc.ldjson
 ```
 
 **Requirements:** Docker running with the target engine container up (e.g. `vehu`).
@@ -78,7 +78,7 @@ For IRIS, co-locate the `m-iris` driver and add `--engine iris` (or
 keep the driver somewhere else.
 
 Once mounted into the `v` umbrella, every command below is also available as
-`v rpc debug …`. Standalone, it is `v-rpc-debug debug …` (the form used throughout).
+`v rpc-debug …`. Standalone, it is `v-rpc-debug …` (the form used throughout).
 
 ## 2. Selecting the engine
 
@@ -92,8 +92,8 @@ override **nothing** (just set the container once, per §1):
 | `--container` | — | `VRPC_CONTAINER` | container/instance name; sets `M_<ENGINE>_CONTAINER` |
 
 ```bash
-v-rpc-debug debug status                                    # ydb / docker / $VRPC_CONTAINER
-v-rpc-debug debug status --engine iris --container foia-t12 # override ad hoc
+v-rpc-debug status                                    # ydb / docker / $VRPC_CONTAINER
+v-rpc-debug status --engine iris --container foia-t12 # override ad hoc
 ```
 
 (The connection — container, base URL, credentials — is otherwise read by the
@@ -115,9 +115,9 @@ the flags entirely:
 export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb     # driver location
 export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker VRPC_CONTAINER=vehu
 
-v-rpc-debug debug status        # no --engine/--transport/--container needed
-v-rpc-debug debug tail
-v-rpc-debug debug capture --out rpc.ldjson
+v-rpc-debug status        # no --engine/--transport/--container needed
+v-rpc-debug tail
+v-rpc-debug capture --out rpc.ldjson
 ```
 
 A flag on the command line always **overrides** its env var, so you can keep ydb
@@ -186,8 +186,8 @@ talking to VistA in the first place.
 
 ### `doctor` / `relay` — get CPRS connected
 
-`v rpc doctor` checks the whole CPRS→VistA network path and tells you exactly what's
-wrong and how to fix it; `v rpc relay` republishes the loopback-bound broker so a VM
+`v rpc-debug doctor` checks the whole CPRS→VistA network path and tells you exactly what's
+wrong and how to fix it; `v rpc-debug relay` republishes the loopback-bound broker so a VM
 can reach it. Because this is the most common stumbling block, it has its own
 section: [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking).
 
@@ -202,7 +202,7 @@ v-rpc-debug relay --install # persistent host relay (systemd --user); or `v-rpc-
 Read-only. Shows the current `XWBDEBUG` level and how much is buffered.
 
 ```bash
-v-rpc-debug debug status --engine ydb --container vehu
+v-rpc-debug status --engine ydb --container vehu
 # engine ydb: XWBDEBUG level 1 (off); 0 log job(s), 0 RPC line(s) buffered
 ```
 
@@ -212,7 +212,7 @@ Arms `XWBDEBUG`, clears the log for a clean slate, then streams new RPC lines to
 your terminal until you press Ctrl-C. On exit it **restores the prior level**.
 
 ```bash
-v-rpc-debug debug tail --engine ydb --container vehu
+v-rpc-debug tail --engine ydb --container vehu
 # [13:21:30] job     416  RPC: XWB IM HERE
 # [13:21:31] job     423  RPC: XUS INTRO MSG
 ```
@@ -225,7 +225,7 @@ Same as `tail`, but appends each record to a file as **LDJSON** (one JSON object
 per line). Use it to grab a sample for offline analysis.
 
 ```bash
-v-rpc-debug debug capture --engine ydb --container vehu --out rpc.ldjson --duration 30s
+v-rpc-debug capture --engine ydb --container vehu --out rpc.ldjson --duration 30s
 ```
 
 Each line looks like:
@@ -245,7 +245,7 @@ broker logs each `RPC: <name>` then rejects it (no session); that's exactly what
 we want to see in the tap.
 
 ```bash
-v-rpc-debug debug ping --addr 127.0.0.1:9430
+v-rpc-debug ping --addr 127.0.0.1:9430
 #   sent XWB IM HERE               (broker replied 52 bytes)
 #   sent XUS INTRO MSG             (broker replied 52 bytes)
 #   sent XWB GET VARIABLE VALUE    (broker replied 52 bytes)
@@ -268,8 +268,8 @@ these. Use them when you want `XWBDEBUG` left on across several separate steps
 (e.g. arm, run a client by hand, then capture with `--no-clear`).
 
 ```bash
-v-rpc-debug debug arm    --engine ydb --container vehu          # set level 2 (names)
-v-rpc-debug debug disarm --engine ydb --container vehu          # restore to level 1 (stock)
+v-rpc-debug arm    --engine ydb --container vehu          # set level 2 (names)
+v-rpc-debug disarm --engine ydb --container vehu          # restore to level 1 (stock)
 ```
 
 ### `clear` — wipe the buffered log
@@ -278,7 +278,7 @@ Kills all `^XTMP("XWBLOG"*)` nodes so the engine is pristine (the buffer otherwi
 auto-purges after ~7 days). Reports how many lines it removed.
 
 ```bash
-v-rpc-debug debug clear --engine ydb --container vehu
+v-rpc-debug clear --engine ydb --container vehu
 # cleared 160 buffered XWBLOG line(s) on ydb
 ```
 
@@ -357,7 +357,7 @@ For `tail`, `-o json` streams the same LDJSON records `capture` writes — handy
 piping into `jq`:
 
 ```bash
-v-rpc-debug debug tail --engine ydb --container vehu -o json | jq -r .rpc
+v-rpc-debug tail --engine ydb --container vehu -o json | jq -r .rpc
 ```
 
 ### ⚠️ PHI warning — level 2 vs 3
@@ -378,10 +378,10 @@ them, then leaves the engine pristine (level 1, log cleared):
 export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb
 ENG="--engine ydb --transport docker --container vehu"
 
-v-rpc-debug debug status $ENG                                   # 1. baseline (level 1, off)
-v-rpc-debug debug arm    $ENG                                   # 2. arm capture (level 2)
-v-rpc-debug debug ping   --addr 127.0.0.1:9430                  # 3. fire real RPCs at the broker
-v-rpc-debug debug capture $ENG --out smoke.ldjson \
+v-rpc-debug status $ENG                                   # 1. baseline (level 1, off)
+v-rpc-debug arm    $ENG                                   # 2. arm capture (level 2)
+v-rpc-debug ping   --addr 127.0.0.1:9430                  # 3. fire real RPCs at the broker
+v-rpc-debug capture $ENG --out smoke.ldjson \
       --no-clear --duration 2s --restore-to 1            # 4. save buffered RPCs -> file, restore to 1
 
 # 5. examine the output
@@ -390,14 +390,14 @@ jq -r '.rpc' smoke.ldjson                                 # just the RPC names
 jq -r '"\(.seq)\t\(.rpc)"' smoke.ldjson                   # seq + name, in order
 jq -s 'group_by(.rpc)|map({rpc:.[0].rpc,n:length})|sort_by(-.n)' smoke.ldjson  # counts
 
-v-rpc-debug debug clear  $ENG                                   # 6. wipe the buffered log
-v-rpc-debug debug status $ENG                                   # 7. confirm: level 1 (off), 0 buffered
+v-rpc-debug clear  $ENG                                   # 6. wipe the buffered log
+v-rpc-debug status $ENG                                   # 7. confirm: level 1 (off), 0 buffered
 ```
 
 ### B. Real CPRS — capture a live login + chart sweep
 
 CPRS runs in the VM; `v-rpc-debug` runs on the host. **Before launching CPRS, make sure
-the network path is healthy** — run `v rpc doctor` and, if it says so, start the
+the network path is healthy** — run `v rpc-debug doctor` and, if it says so, start the
 relay (see [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking) below).
 With the path green, CPRS connects to the address `doctor` prints (vehu:
 `s=10.0.2.2 p=19431`).
@@ -407,7 +407,7 @@ export M_YDB_BIN=~/vista-cloud-dev/m-ydb/dist/m-ydb
 ENG="--engine ydb --transport docker --container vehu"
 
 # 1. start capturing (arms, clears, streams to file). Leave it running.
-v-rpc-debug debug capture $ENG --out cprs-login.ldjson --restore-to 1
+v-rpc-debug capture $ENG --out cprs-login.ldjson --restore-to 1
 
 #   --- in the VM: launch CPRS, sign in as PROVIDER,VERO (CAS123;CAS123..),
 #       open patient TEN,PATIENT, click through the chart tabs ---
@@ -420,8 +420,8 @@ jq -r '"\(.seq)\t\(.rpc)"' cprs-login.ldjson | head -20         # the sign-on se
 jq -s 'group_by(.rpc)|map({rpc:.[0].rpc,n:length})|sort_by(-.n)|.[:20]' cprs-login.ldjson
 
 # 4. clean up
-v-rpc-debug debug clear  $ENG
-v-rpc-debug debug status $ENG                                   # level 1 (off), 0 buffered
+v-rpc-debug clear  $ENG
+v-rpc-debug status $ENG                                   # level 1 (off), 0 buffered
 ```
 
 > Capture files (`*.ldjson`) are git-ignored — they're data, not source.
@@ -432,8 +432,8 @@ CPRS-in-a-VM reaching VistA-in-Docker is the single most error-prone step, and i
 always fails the same opaque way: CPRS shows **`WSAECONNREFUSED / WASConnectByName`**.
 The cause is almost always that the broker is published to the host's **loopback
 only** (Docker `127.0.0.1:9430`), which a VM cannot reach — so the path needs a
-relay on a reachable interface. `v rpc doctor` diagnoses the whole chain and tells
-you exactly what to do; `v rpc relay` is the fix.
+relay on a reachable interface. `v rpc-debug doctor` diagnoses the whole chain and tells
+you exactly what to do; `v rpc-debug relay` is the fix.
 
 ```bash
 v-rpc-debug doctor                     # walk docker -> publish mode -> broker -> relay; prints the CPRS address
@@ -459,7 +459,7 @@ v-rpc-debug relay                      # or just run it in the foreground (Ctrl-
 v-rpc-debug relay --status             # is it listening / installed / active?
 ```
 
-`v rpc relay` is a built-in TCP forwarder (no `socat` needed): it discovers the
+`v rpc-debug relay` is a built-in TCP forwarder (no `socat` needed): it discovers the
 broker port from `docker inspect` and republishes it on `0.0.0.0:19431` so the VM
 can reach it. `--install` writes a `systemd --user` unit (`loginctl enable-linger`
 to run it without a login session). It never touches vehu or VistA — pure
@@ -480,7 +480,7 @@ The whole point of the LDJSON format is that its field names line up with the
 s3tap envelope (`rpc`, `ts`, `job`, `seq`), so you can join the two captures
 **offline** to validate the VSL tap:
 
-1. Capture the oracle: `v rpc debug capture … --out xwbdebug.ldjson` while you run
+1. Capture the oracle: `v rpc-debug capture … --out xwbdebug.ldjson` while you run
    a known workload (e.g. a CPRS login).
 2. Capture the same workload through the VSL tap (separate pipeline) → its LDJSON.
 3. Compare offline — e.g. load both into DuckDB and diff the set of `rpc` names
@@ -494,7 +494,7 @@ s3tap envelope (`rpc`, `ts`, `job`, `seq`), so you can join the two captures
    ```
 
 The correlation/analysis itself lives in the analysis pipeline, **not** in this
-tool — `v rpc debug` only produces the comparable oracle output.
+tool — `v rpc-debug` only produces the comparable oracle output.
 
 ## 8. Limitations
 
@@ -517,10 +517,10 @@ tool — `v rpc debug` only produces the comparable oracle output.
 | `NO_DRIVER` error | The `m-<engine>` driver isn't found — build it (`make build` in `m-ydb`/`m-iris`) or set `M_<ENGINE>_BIN`. |
 | `ENGINE` error from `status` | Engine down or unreachable over the driver — check the container is up and the transport/container flags are right. |
 | Nothing appears in `tail` | No traffic is hitting the broker, or your `--filter` excludes it; try `--all`, and confirm with `status` that the level is ≥ 2. |
-| Level didn't restore (still `ON`) | Either a hard-kill (`kill -9`) skipped the restore, or an **overlapping run**: `tail`/`capture` restore to the level they *found* at start, so if one started while another already armed level 2, it leaves it at 2. Fix: `v rpc debug disarm`, or run with `--restore-to 1` to force stock on exit. |
-| Buffered lines won't go away | They auto-purge in ~7 days; to wipe now use `v rpc debug clear` (or start a `tail`/`capture` without `--no-clear`). |
+| Level didn't restore (still `ON`) | Either a hard-kill (`kill -9`) skipped the restore, or an **overlapping run**: `tail`/`capture` restore to the level they *found* at start, so if one started while another already armed level 2, it leaves it at 2. Fix: `v rpc-debug disarm`, or run with `--restore-to 1` to force stock on exit. |
+| Buffered lines won't go away | They auto-purge in ~7 days; to wipe now use `v rpc-debug clear` (or start a `tail`/`capture` without `--no-clear`). |
 | Capture file empty | The workload ran outside the capture window, or every connection was wiped between polls — lower `--interval`, or arm first and capture with `--no-clear`. |
-| CPRS can't reach vehu (`WSAECONNREFUSED`) | Run `v rpc doctor` — it pinpoints the broken hop. Usually the broker is published loopback-only and the relay is down: `v rpc doctor --fix` (or `v rpc relay --install`). See [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking). |
+| CPRS can't reach vehu (`WSAECONNREFUSED`) | Run `v rpc-debug doctor` — it pinpoints the broken hop. Usually the broker is published loopback-only and the relay is down: `v rpc-debug doctor --fix` (or `v rpc-debug relay --install`). See [Connecting CPRS to vehu](#connecting-cprs-to-vehu-networking). |
 
 ## References
 

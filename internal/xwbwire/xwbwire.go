@@ -3,7 +3,7 @@
 // capture. It is pure byte assembly (no I/O), so it is unit-testable; the TCP
 // send lives in the rpccli ping command.
 //
-// This is the v rpc domain acting as an RPC *client* (like CPRS), talking the
+// This is the v rpc-debug domain acting as an RPC *client* (like CPRS), talking the
 // broker's TCP wire protocol — distinct from reaching the M engine, which always
 // goes through the m-driver-sdk seam.
 //

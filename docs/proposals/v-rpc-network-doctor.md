@@ -8,10 +8,10 @@ doc_type: [PROPOSAL]
 layer: v
 ---
 
-# `v rpc doctor` + `v rpc relay` — a transparent, portable fix for the CPRS↔VistA network path
+# `v rpc-debug doctor` + `v rpc-debug relay` — a transparent, portable fix for the CPRS↔VistA network path
 
-> **Status: IMPLEMENTED 2026-06-27** (owner-authorized build). `v rpc doctor` +
-> `v rpc relay` are live and verified against vehu end-to-end. See the increment
+> **Status: IMPLEMENTED 2026-06-27** (owner-authorized build). `v rpc-debug doctor` +
+> `v rpc-debug relay` are live and verified against vehu end-to-end. See the increment
 > tracker (`docs/v-rpc-implementation-plan.md`) and
 > `docs/memory/v-rpc-doctor-relay.md`. The three **Open questions** below remain
 > for owner confirmation but did not block the build.
@@ -57,7 +57,7 @@ Add two verbs to the `v rpc` domain. They reuse what v-rpc-debug already has —
 [XWB] client** (socket-side checks, as `ping` does) — so they are a natural
 extension, not a new subsystem.
 
-### 1. `v rpc relay` — a built-in, dependency-free TCP forwarder
+### 1. `v rpc-debug relay` — a built-in, dependency-free TCP forwarder
 
 Replace ad-hoc `socat` with ~30 lines of Go (`net.Listen` + bidirectional
 `io.Copy`, one goroutine per connection). Why built-in:
@@ -69,10 +69,10 @@ Replace ad-hoc `socat` with ~30 lines of Go (`net.Listen` + bidirectional
   binding*, not hardcoded — so it adapts to whatever container/port the user has.
 
 ```
-v rpc relay                       # listen 0.0.0.0:19431 -> discovered broker (127.0.0.1:9430)
-v rpc relay --listen 0.0.0.0:19431 --to 127.0.0.1:9430
-v rpc relay --install             # generate a user systemd unit (Linux) / print launchd plist (macOS)
-v rpc relay --status / --uninstall
+v rpc-debug relay                       # listen 0.0.0.0:19431 -> discovered broker (127.0.0.1:9430)
+v rpc-debug relay --listen 0.0.0.0:19431 --to 127.0.0.1:9430
+v rpc-debug relay --install             # generate a user systemd unit (Linux) / print launchd plist (macOS)
+v rpc-debug relay --status / --uninstall
 ```
 
 `--install` **generates** the persistence artifact (today's hand-made
@@ -80,7 +80,7 @@ v rpc relay --status / --uninstall
 side effect, and it is host plumbing, **not** an M-engine installer (the
 "never a bespoke installer" directive governs KIDS/engine installs, not this).
 
-### 2. `v rpc doctor` — the end-to-end network healthcheck (headline)
+### 2. `v rpc-debug doctor` — the end-to-end network healthcheck (headline)
 
 One command that walks the chain **engine → host → relay → guest** and prints, per
 hop: what it checked, the result (✓/✗), and the **exact remediation**. Each check
@@ -88,12 +88,12 @@ is independently meaningful, so a red line tells you precisely which boundary
 broke.
 
 ```
-$ v rpc doctor --engine ydb --container vehu
+$ v rpc-debug doctor --engine ydb --container vehu
 ✓ docker          vehu is running (image worldvista/vehu)
 ✓ broker publish  9430 published — but bound 127.0.0.1 (loopback only) → a relay is required for a VM
 ✓ broker listener XWB handshake on 127.0.0.1:9430 replied 52 bytes (listener live)
 ✗ relay           nothing listening on 0.0.0.0:19431
-                  → run `v rpc relay` (or `v rpc relay --install` for always-on)
+                  → run `v rpc-debug relay` (or `v rpc-debug relay --install` for always-on)
 …
 CPRS should connect to:  s=10.0.2.2  p=19431     (VirtualBox NAT)
 ```
@@ -108,7 +108,7 @@ Check ladder:
    `XWB IM HERE` handshake (reuse `xwbwire`/`ping`); a reply proves the M listener
    is actually accepting, not just the docker proxy. → fix: listener down in VistA.
 4. **relay present** — if loopback-only, is a non-loopback listener up on the relay
-   port? → fix: `v rpc relay` / `--install`.
+   port? → fix: `v rpc-debug relay` / `--install`.
 5. **relay forwards** — run the same handshake *through* the relay → proves the full
    host path end-to-end.
 6. **guest target** — print the exact CPRS string for the detected/declared VBox
@@ -116,7 +116,7 @@ Check ladder:
    the guest; it states the expectation.)
 7. **firewall** (best-effort, advisory) — ufw/iptables block on the relay port?
 
-`v rpc doctor --fix` performs only the **safe, reversible** auto-fixes (start the
+`v rpc-debug doctor --fix` performs only the **safe, reversible** auto-fixes (start the
 relay) and prints the CPRS connection string + the VirtualBox shortcut. It **never
 touches vehu, VistA config, or the guest** — diagnosis and host plumbing only.
 
@@ -131,8 +131,8 @@ The magic numbers become discovered or documented-and-overridable:
 | guest host | VBox-NAT convention `10.0.2.2`, stated + overridable for bridged/host-only |
 | container | existing `VRPC_CONTAINER` |
 
-Net effect: the next user runs **`v rpc doctor`**, is *told* their topology and the
-one thing to fix, and runs **`v rpc relay`** (or `doctor --fix`). No tribal
+Net effect: the next user runs **`v rpc-debug doctor`**, is *told* their topology and the
+one thing to fix, and runs **`v rpc-debug relay`** (or `doctor --fix`). No tribal
 knowledge, no AI required.
 
 ## Why this shape
@@ -167,11 +167,11 @@ knowledge, no AI required.
 - **I2 `internal/netcheck`** (TDD, fake docker-inspect + fake dialer): the check
   ladder as pure functions returning structured results (so `doctor` renders, and
   `-o json` emits them for scripts/agents).
-- **I3 `v rpc relay`** — wire I1 + publish-binding discovery; `--install` unit
+- **I3 `v rpc-debug relay`** — wire I1 + publish-binding discovery; `--install` unit
   generator (user systemd today; launchd plist text for macOS).
-- **I4 `v rpc doctor`** — wire I2; human ladder + `-o json`; `--fix` calls relay.
+- **I4 `v rpc-debug doctor`** — wire I2; human ladder + `-o json`; `--fix` calls relay.
 - **I5** — fold into the user guide (replace the hand-run socat steps in §6B/§9
-  with `v rpc doctor`/`relay`); update `vehu-broker-vbox-relay` memory.
+  with `v rpc-debug doctor`/`relay`); update `vehu-broker-vbox-relay` memory.
 
 ## References
 

@@ -1,10 +1,13 @@
-// Package rpccli is the importable command surface of the `v rpc` domain. The
-// standalone v-rpc-debug binary mounts it at the top level; the `v` umbrella mounts
-// the same structs as `v rpc <verb>` (the static-pinned composition v-pkg uses).
+// Package rpccli is the importable command surface of the `v rpc-debug` domain.
+// The standalone v-rpc-debug binary mounts it at the top level; the `v` umbrella
+// mounts the same structs as `v rpc-debug <verb>` (the static-pinned composition
+// v-pkg uses). It is the safe, read-only sibling of the high-risk `v rpc-tap`
+// domain (v-rpc-tap repo); the two integrate only at the v-cli busybox.
 //
-// Today it carries one group, `v rpc debug`, which taps the RPC Broker's native
-// XWBDEBUG log over the m engine seam to view or save live RPC traffic. `v rpc`
-// is scoped to grow other verbs later, so debug capture lives under `debug`.
+// Two groups: Capture taps the RPC Broker's native XWBDEBUG log over the m
+// engine seam to view or save live RPC traffic (tail/capture/status/arm/disarm/
+// clear/ping); Connect diagnoses and republishes the CPRS↔VistA broker network
+// path (doctor/relay).
 package rpccli
 
 import (
@@ -18,9 +21,19 @@ import (
 	"github.com/vista-cloud-dev/v-rpc-debug/internal/capture"
 )
 
-// Commands is the `v rpc` verb set, embedded by the umbrella and the standalone.
+// Commands is the `v rpc-debug` verb set, embedded by the umbrella and the
+// standalone. The XWBDEBUG tap verbs sit directly at the domain level (the
+// names-only oracle; level 3 logs RPC params = PHI), grouped as Capture; the
+// network verbs are grouped as Connect.
 type Commands struct {
-	Debug  debugCmd  `cmd:"" group:"Capture" help:"Tap the RPC Broker's native XWBDEBUG log: view or save live RPC traffic."`
+	Tail    tailCmd    `cmd:"" group:"Capture" help:"Stream live RPC traffic to the terminal (Ctrl-C to stop)."`
+	Capture captureCmd `cmd:"" group:"Capture" help:"Append live RPC traffic to a file as LDJSON for offline analysis."`
+	Status  statusCmd  `cmd:"" group:"Capture" help:"Show the current XWBDEBUG level and active log jobs."`
+	Arm     armCmd     `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture on (set the broker debug level)."`
+	Disarm  disarmCmd  `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture off (restore the debug level)."`
+	Clear   clearCmd   `cmd:"" group:"Capture" help:"Wipe the buffered XWBLOG (leave the engine pristine)."`
+	Ping    pingCmd    `cmd:"" group:"Capture" help:"Fire test RPCs at a broker so a tap has traffic to capture."`
+
 	Doctor doctorCmd `cmd:"" group:"Connect" help:"Diagnose the CPRS↔VistA broker network path (and --fix it)."`
 	Relay  relayCmd  `cmd:"" group:"Connect" help:"Republish the loopback-bound broker so a VM (CPRS) can reach it."`
 }

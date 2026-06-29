@@ -1,19 +1,19 @@
 ---
 name: v-rpc-domain
-description: v-rpc-debug is a new Go `v` domain (`v rpc debug`) that taps the RPC Broker's native XWBDEBUG log over the m-driver-sdk seam to view/save live RPC traffic for offline comparison against the VSL tap. Built 2026-06-26; v-cli mount deferred until the repo is published+tagged.
+description: v-rpc-debug is a new Go `v` domain (`v rpc-debug`) that taps the RPC Broker's native XWBDEBUG log over the m-driver-sdk seam to view/save live RPC traffic for offline comparison against the VSL tap. Built 2026-06-26; v-cli mount deferred until the repo is published+tagged.
 metadata:
   type: project
 ---
 
 **v-rpc-debug created 2026-06-26.** A new repo under vista-cloud-dev: the `v rpc`
 domain, Go, exports importable `rpccli` (the `v` umbrella will mount it as
-`v rpc`, mirroring v-pkg/pkgcli). Layer `v`. Headline capability **`v rpc debug`**
+`v rpc`, mirroring v-pkg/pkgcli). Layer `v`. Headline capability **`v rpc-debug`**
 taps the RPC Broker's *native* `XWBDEBUG` log (`^XTMP("XWBLOG"_$J)`) over the m
 engine driver seam to **view live RPC traffic in the terminal** or **save it to a
 file as LDJSON** for **offline comparison against the Phase-2 VSL tap** — a
 debug/validation tool, NOT a durable egress tap (that's the VSL hook).
 
-**Locked design (with owner):** `v rpc debug {tail,capture,status,arm,disarm,clear,ping}`
+**Locked design (with owner):** `v rpc-debug {tail,capture,status,arm,disarm,clear,ping}`
 (`ping` fires no-arg [XWB] RPCs at a broker to self-test capture — RPC-client role,
 takes `--addr`, not the engine seam);
 shared flags `--all/--filter/--interval/--duration/--level{2,3}/--keep/--no-clear`;
@@ -30,7 +30,7 @@ TUI later. Engine flags also read env (`VRPC_ENGINE`/`VRPC_TRANSPORT`/
 → sibling dist/ → PATH) — so co-install both via `make install BINDIR=…` + drop the
 driver in the same dir, and **no `M_<ENGINE>_BIN` needed**. With engine defaulting to
 ydb + transport docker, the ONLY irreducible config is the container
-(`VRPC_CONTAINER`); `v-rpc-debug debug status` then runs fully flagless. Verified.
+(`VRPC_CONTAINER`); `v-rpc-debug status` then runs fully flagless. Verified.
 
 **Architecture (waterline-clean):** `internal/xwblog` = pure parse/record/LDJSON/
 dedup (no engine dep, TDD); `internal/capture` = arm/disarm + poll + dedup over a
@@ -59,7 +59,7 @@ gitignored (data, not source).
 
 **RESTORE/CLEAR (added 2026-06-26):** `tail`/`capture` restore XWBDEBUG to the
 level they *found* at start, so overlapping runs can leave it armed — pass
-`--restore-to 1` to force stock on exit, or `v rpc debug disarm`. `v rpc debug
+`--restore-to 1` to force stock on exit, or `v rpc-debug disarm`. `v rpc-debug
 clear` wipes the buffered `^XTMP("XWBLOG"*)` on demand (it otherwise auto-purges in
 ~7 days).
 

@@ -40,7 +40,7 @@ func (c *doctorCmd) Run(cc *clikit.Context) error {
 	var fixNote string
 	if c.Fix && rep.RelayNeeded && checkFailed(rep, "relay") {
 		if runtime.GOOS != "linux" {
-			fixNote = "--fix auto-install is Linux-only; run `v rpc relay` by hand"
+			fixNote = "--fix auto-install is Linux-only; run `v rpc-debug relay` by hand"
 		} else if _, err := ensureRelayService(c.RelayAddr, c.backendFor(ctx)); err != nil {
 			fixNote = "could not start relay: " + err.Error()
 		} else {

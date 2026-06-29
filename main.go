@@ -1,17 +1,17 @@
-// Command v-rpc-debug is the standalone form of the `v rpc` domain — VistA RPC
-// developer tools. Today it carries `v rpc debug`, which taps the RPC Broker's
+// Command v-rpc-debug is the standalone form of the `v rpc-debug` domain — VistA RPC
+// developer tools. Today it carries `v rpc-debug`, which taps the RPC Broker's
 // native XWBDEBUG log over the m engine seam (mdriver.Client) to view live RPC
 // traffic in the terminal or save it to a file as LDJSON for offline comparison
 // against the VSL tap. The verb set lives in the importable rpccli package so
-// the `v` umbrella mounts the same commands as `v rpc <verb>`.
+// the `v` umbrella mounts the same commands as `v rpc-debug <verb>`.
 //
 // Try:
 //
-//	v-rpc-debug debug status  --engine ydb --container vehu
-//	v-rpc-debug debug tail    --engine ydb --container vehu
-//	v-rpc-debug debug capture --engine ydb --container vehu --out rpc.ldjson
-//	v-rpc-debug debug arm     --engine ydb --container vehu
-//	v-rpc-debug debug disarm  --engine ydb --container vehu
+//	v-rpc-debug status  --engine ydb --container vehu
+//	v-rpc-debug tail    --engine ydb --container vehu
+//	v-rpc-debug capture --engine ydb --container vehu --out rpc.ldjson
+//	v-rpc-debug arm     --engine ydb --container vehu
+//	v-rpc-debug disarm  --engine ydb --container vehu
 //	v-rpc-debug schema | jq .
 package main
 

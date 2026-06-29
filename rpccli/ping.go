@@ -14,7 +14,7 @@ import (
 var defaultPingRPCs = []string{"XWB IM HERE", "XUS INTRO MSG", "XWB GET VARIABLE VALUE"}
 
 // pingCmd fires test RPCs directly at a broker's TCP port so a running
-// `v rpc debug tail`/`capture` has traffic to capture. It connects as an RPC
+// `v rpc-debug tail`/`capture` has traffic to capture. It connects as an RPC
 // client over the [XWB] wire protocol (one fresh connection per RPC, as the
 // broker may end the job after one unauthenticated message) — it does NOT reach
 // the M engine, so it takes a broker --addr, not the engine flags.

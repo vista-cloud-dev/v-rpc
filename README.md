@@ -1,6 +1,6 @@
 # v-rpc-debug — the `v rpc` domain
 
-VistA RPC developer tools. Today it carries **`v rpc debug`**, which taps the RPC
+VistA RPC developer tools. Today it carries **`v rpc-debug`**, which taps the RPC
 Broker's *native* `XWBDEBUG` log over the **m engine driver seam** to view live
 RPC traffic in the terminal or save it to a file for **offline comparison against
 the Phase-2 VSL tap**.
@@ -24,21 +24,21 @@ separately**; this tool only produces comparable output (LDJSON whose fields —
 **Connect** — get CPRS talking to VistA (the most common stumbling block):
 
 ```
-v rpc doctor                                           # diagnose the CPRS↔VistA network path; print the fix + CPRS address
-v rpc doctor --fix                                     # ...and start the relay if it's needed and missing
-v rpc relay  --install                                 # built-in TCP forwarder (no socat); persistent systemd --user service
+v rpc-debug doctor                                           # diagnose the CPRS↔VistA network path; print the fix + CPRS address
+v rpc-debug doctor --fix                                     # ...and start the relay if it's needed and missing
+v rpc-debug relay  --install                                 # built-in TCP forwarder (no socat); persistent systemd --user service
 ```
 
-**Capture** — `v rpc debug`, the XWBDEBUG tap:
+**Capture** — `v rpc-debug`, the XWBDEBUG tap:
 
 ```
-v rpc debug status   --engine ydb --container vehu     # current XWBDEBUG level + buffered jobs
-v rpc debug tail     --engine ydb --container vehu     # live viewer in the terminal (Ctrl-C)
-v rpc debug capture  --engine ydb --container vehu --out rpc.ldjson   # save LDJSON for offline analysis
-v rpc debug arm      --engine ydb --container vehu     # turn capture on (XWBDEBUG level 2)
-v rpc debug disarm   --engine ydb --container vehu     # restore (level 1 = stock)
-v rpc debug clear    --engine ydb --container vehu     # wipe the buffered XWBLOG (pristine)
-v rpc debug ping     --addr 127.0.0.1:9430            # fire test RPCs so a tap has traffic
+v rpc-debug status   --engine ydb --container vehu     # current XWBDEBUG level + buffered jobs
+v rpc-debug tail     --engine ydb --container vehu     # live viewer in the terminal (Ctrl-C)
+v rpc-debug capture  --engine ydb --container vehu --out rpc.ldjson   # save LDJSON for offline analysis
+v rpc-debug arm      --engine ydb --container vehu     # turn capture on (XWBDEBUG level 2)
+v rpc-debug disarm   --engine ydb --container vehu     # restore (level 1 = stock)
+v rpc-debug clear    --engine ydb --container vehu     # wipe the buffered XWBLOG (pristine)
+v rpc-debug ping     --addr 127.0.0.1:9430            # fire test RPCs so a tap has traffic
 ```
 
 The engine flags also read env vars — `export VRPC_ENGINE=ydb VRPC_TRANSPORT=docker
@@ -82,7 +82,7 @@ make install BINDIR=~/scripts/bin   # install onto PATH
 `v-rpc-debug` is one static binary. Put the `m-ydb`/`m-iris` driver in the **same** PATH
 directory and `v-rpc-debug` auto-locates it (no `M_<ENGINE>_BIN` needed). Then the only
 config is the container — `export VRPC_CONTAINER=vehu` (engine defaults to `ydb`,
-transport to `docker`) and run flagless: `v-rpc-debug debug status`. See the
+transport to `docker`) and run flagless: `v-rpc-debug status`. See the
 [user guide §1](docs/v-rpc-user-guide.md#1-setup-one-time).
 
 Caveat (inherent to XWBDEBUG): `^XTMP("XWBLOG"_$J)` is per-handler and wiped at

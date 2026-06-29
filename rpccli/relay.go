@@ -63,7 +63,7 @@ func (c *relayCmd) runForeground(cc *clikit.Context) error {
 	ln, err := net.Listen("tcp", c.Listen)
 	if err != nil {
 		return clikit.Fail(clikit.ExitRuntime, "LISTEN", err.Error(),
-			"is another relay already bound to "+c.Listen+"? try `v rpc relay --status`")
+			"is another relay already bound to "+c.Listen+"? try `v rpc-debug relay --status`")
 	}
 	fmt.Fprintf(cc.Stderr, "# relay %s -> %s — Ctrl-C to stop\n", c.Listen, to)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)

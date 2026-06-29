@@ -13,18 +13,11 @@ import (
 	"github.com/vista-cloud-dev/v-rpc-debug/internal/xwblog"
 )
 
-// debugCmd groups the XWBDEBUG tap verbs. Capture is debug-grade and names-only
-// at level 2 (level 3 logs RPC parameters = PHI); it lands in ^XTMP("XWBLOG"_$J)
-// and is the zero-install oracle for the durable VSL tap, not a replacement.
-type debugCmd struct {
-	Tail    tailCmd    `cmd:"" help:"Stream live RPC traffic to the terminal (Ctrl-C to stop)."`
-	Capture captureCmd `cmd:"" help:"Append live RPC traffic to a file as LDJSON for offline analysis."`
-	Status  statusCmd  `cmd:"" help:"Show the current XWBDEBUG level and active log jobs."`
-	Arm     armCmd     `cmd:"" help:"Turn XWBDEBUG capture on (set the broker debug level)."`
-	Disarm  disarmCmd  `cmd:"" help:"Turn XWBDEBUG capture off (restore the debug level)."`
-	Clear   clearCmd   `cmd:"" help:"Wipe the buffered XWBLOG (leave the engine pristine)."`
-	Ping    pingCmd    `cmd:"" help:"Fire test RPCs at a broker so a tap has traffic to capture."`
-}
+// The XWBDEBUG tap verbs (tail/capture/status/arm/disarm/clear/ping) are defined
+// below and mounted directly on Commands (group "Capture"). Capture is
+// debug-grade and names-only at level 2 (level 3 logs RPC parameters = PHI); it
+// lands in ^XTMP("XWBLOG"_$J) and is the zero-install oracle for the durable VSL
+// tap (v-rpc-tap), not a replacement.
 
 // --- shared capture options + loop ------------------------------------------
 
@@ -64,7 +57,7 @@ func runTap(ec engineConn, o tapOpts, emit func(capture.Record), note func(strin
 	prior, err := capture.Level(ctx, ex)
 	if err != nil {
 		return clikit.Fail(clikit.ExitRuntime, "ENGINE", err.Error(),
-			"is the engine up and reachable over the driver? try `v rpc debug status`")
+			"is the engine up and reachable over the driver? try `v rpc-debug status`")
 	}
 	if err := capture.Arm(ctx, ex, o.Level); err != nil {
 		return clikit.Fail(clikit.ExitRuntime, "ARM", err.Error(), "")

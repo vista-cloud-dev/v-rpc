@@ -1,5 +1,5 @@
 ---
-title: v-rpc-debug implementation plan — the `v rpc debug` RPC-tap viewer/capture
+title: v-rpc-debug implementation plan — the `v rpc-debug` RPC-tap viewer/capture
 status: draft
 version: v0.1.0
 created: 2026-06-26
@@ -8,11 +8,11 @@ doc_type: [PLAN]
 layer: v
 ---
 
-# v-rpc-debug — `v rpc debug` (RPC Broker debug tap: view + save)
+# v-rpc-debug — `v rpc-debug` (RPC Broker debug tap: view + save)
 
 ## Purpose
 
-A **debug/validation** tool. `v rpc debug` taps the RPC Broker's *native*
+A **debug/validation** tool. `v rpc-debug` taps the RPC Broker's *native*
 `XWBDEBUG` log (`^XTMP("XWBLOG"_$J)`) over the m engine seam to **view live RPC
 traffic in the terminal** and **save it to a file** for **offline comparison
 against the Phase-2 VSL tap**. Goals: validate the VSL tap captures correctly,
@@ -30,7 +30,7 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
 | Decision | Choice |
 |---|---|
 | Repo | `v-rpc-debug` (new), exports importable `rpccli`; `v` umbrella mounts `v rpc` |
-| Command group | `v rpc debug …` (scoped — `v rpc` will carry other verbs later) |
+| Command group | `v rpc-debug …` (scoped — `v rpc` will carry other verbs later) |
 | Verbs | `tail` (live CLI viewer), `capture --out file://…` (LDJSON), `status`, `arm`/`disarm` |
 | Viewer | CLI now; structured so a TUI drops in later |
 | Sinks | terminal + local file (LDJSON). **No S3 here** (offline correlation is separate) |
@@ -57,9 +57,9 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
 - [x] **I2 — `internal/capture`** (TDD green, fake Execer): `Arm/Disarm` (XPAR
   level + read-back confirm), `ReadAll`/`Tailer.ReadNew` (poll + dedup), `Clear`,
   `Level`, marker-based reader parse (newline-encoding tolerant).
-- [x] **I3b — `v rpc debug ping`** (TDD `xwbwire` 100%): fires no-arg [XWB] RPCs
+- [x] **I3b — `v rpc-debug ping`** (TDD `xwbwire` 100%): fires no-arg [XWB] RPCs
   at a broker (`--addr`) so capture has self-contained traffic — no python/CPRS.
-- [x] **I3 — `rpccli`**: `v rpc debug {tail,capture,status,arm,disarm,ping}` with
+- [x] **I3 — `rpccli`**: `v rpc-debug {tail,capture,status,arm,disarm,ping}` with
   `--all/--filter/--interval/--duration/--level/--keep/--no-clear`, engine flags,
   real `mdriver.Client` adapter; `main.go`. `make check` green (gofmt+lint+race+build).
   **Live `status` proven** through the real driver against vehu (level 1, as-found).
@@ -76,8 +76,8 @@ and the `cprs-rpc-xwbdebug-host-probe` memory.
 - [x] **Minimal config / portability (2026-06-26)** — engine flags read env
   (`VRPC_*`); `--engine` defaults to `ydb`; driver auto-located next to `v-rpc-debug` on
   PATH (no `M_<ENGINE>_BIN`); `make install`. Net: only `VRPC_CONTAINER` needed,
-  `v-rpc-debug debug status` runs fully flagless. Verified against vehu.
-- [x] **Connect verbs — `v rpc doctor` + `v rpc relay` (2026-06-27)** — make the
+  `v-rpc-debug status` runs fully flagless. Verified against vehu.
+- [x] **Connect verbs — `v rpc-debug doctor` + `v rpc-debug relay` (2026-06-27)** — make the
   CPRS↔VistA broker network path self-diagnosing/self-fixing instead of tribal
   socat knowledge. TDD leaf-first: `internal/relay` (TCP forwarder, 95.8%) +
   `internal/netcheck` (pure ladder over injected Docker+Prober, 86.8%); real
