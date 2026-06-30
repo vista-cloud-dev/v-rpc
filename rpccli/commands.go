@@ -26,16 +26,16 @@ import (
 // names-only oracle; level 3 logs RPC params = PHI), grouped as Capture; the
 // network verbs are grouped as Connect.
 type Commands struct {
-	Tail    tailCmd    `cmd:"" group:"Capture" help:"Stream live RPC traffic to the terminal (Ctrl-C to stop)."`
-	Capture captureCmd `cmd:"" group:"Capture" help:"Append live RPC traffic to a file as LDJSON for offline analysis."`
-	Status  statusCmd  `cmd:"" group:"Capture" help:"Show the current XWBDEBUG level and active log jobs."`
-	Arm     armCmd     `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture on (set the broker debug level)."`
-	Disarm  disarmCmd  `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture off (restore the debug level)."`
-	Clear   clearCmd   `cmd:"" group:"Capture" help:"Wipe the buffered XWBLOG (leave the engine pristine)."`
-	Ping    pingCmd    `cmd:"" group:"Capture" help:"Fire test RPCs at a broker so a tap has traffic to capture."`
+	Tail    tailCmd    `cmd:"" group:"Capture" help:"Stream live RPC traffic to the terminal (Ctrl-C to stop)." example:"v rpc-debug tail --container vehu"`
+	Capture captureCmd `cmd:"" group:"Capture" help:"Append live RPC traffic to a file as LDJSON for offline analysis." example:"v rpc-debug capture --container vehu --out cprs.ldjson"`
+	Status  statusCmd  `cmd:"" group:"Capture" help:"Show the current XWBDEBUG level and active log jobs." example:"v rpc-debug status --container vehu"`
+	Arm     armCmd     `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture on (set the broker debug level)." example:"v rpc-debug arm --container vehu --level 2"`
+	Disarm  disarmCmd  `cmd:"" group:"Capture" help:"Turn XWBDEBUG capture off (restore the debug level)." example:"v rpc-debug disarm --container vehu --level 1"`
+	Clear   clearCmd   `cmd:"" group:"Capture" help:"Wipe the buffered XWBLOG (leave the engine pristine)." example:"v rpc-debug clear --container vehu"`
+	Ping    pingCmd    `cmd:"" group:"Capture" help:"Fire test RPCs at a broker so a tap has traffic to capture." example:"v rpc-debug ping --addr 127.0.0.1:9430"`
 
-	Doctor doctorCmd `cmd:"" group:"Connect" help:"Diagnose the CPRS↔VistA broker network path (and --fix it)."`
-	Relay  relayCmd  `cmd:"" group:"Connect" help:"Republish the loopback-bound broker so a VM (CPRS) can reach it."`
+	Doctor doctorCmd `cmd:"" group:"Connect" help:"Diagnose the CPRS↔VistA broker network path (and --fix it)." example:"v rpc-debug doctor --container vehu"`
+	Relay  relayCmd  `cmd:"" group:"Connect" help:"Republish the loopback-bound broker so a VM (CPRS) can reach it." example:"v rpc-debug relay --install --to 127.0.0.1:9430"`
 }
 
 // engineConn selects which engine to drive and over which transport — the same
