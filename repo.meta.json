@@ -1,7 +1,7 @@
 {
   "id": "tool:v-rpc-debug",
   "repo": "https://github.com/vista-cloud-dev/v-rpc-debug",
-  "role": "VistA RPC developer tools — the `v rpc` domain. `v rpc debug` taps the RPC Broker's native debug log (XWBDEBUG) over the m engine seam to view/save live RPC traffic for offline comparison against the VSL tap.",
+  "role": "VistA RPC developer tools — the `v rpc-debug` domain. Taps the RPC Broker's native debug log (XWBDEBUG) over the m engine seam to view/save live RPC traffic for offline comparison against the VSL tap. The safe, read-only sibling of the high-risk `v rpc-tap` domain; the two integrate only at the v-cli busybox.",
   "language": ["go"],
   "layer": "v",
   "license": "AGPL-3.0",
