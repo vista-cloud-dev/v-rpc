@@ -53,8 +53,18 @@ type engineConn struct {
 // capture.Execer backed by the shared reference Client — the seam's single
 // transport (waterline rule 3). v-rpc-debug never hand-rolls transport.
 func (e engineConn) execer() (capture.Execer, *clikit.Error) {
+	envKey := "M_" + strings.ToUpper(e.Engine) + "_CONTAINER"
 	if e.Container != "" {
-		_ = os.Setenv("M_"+strings.ToUpper(e.Engine)+"_CONTAINER", e.Container)
+		_ = os.Setenv(envKey, e.Container)
+	}
+	// Docker transport execs M inside a named container, so the container name is
+	// the one irreducible input (engine + transport both default). Surface its
+	// absence as a USAGE error up front — not a later cryptic engine fault — so
+	// clikit answers a bare `tail`/`status`/… with the verb's help.
+	if e.Transport == "docker" && os.Getenv(envKey) == "" {
+		return nil, clikit.Fail(clikit.ExitUsage, "USAGE",
+			"no engine container: --engine "+e.Engine+" over docker transport needs a container name",
+			"pass --container NAME or set $VRPC_CONTAINER (e.g. vehu for ydb, foia-t12 for iris)")
 	}
 	bin, err := mdriver.Locate(e.Engine, mdriver.DefaultLocateDeps())
 	if err != nil {
